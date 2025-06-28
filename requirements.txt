@@ -1,1 +1,7 @@
 pandas
+pdfminer.six
+pytesseract
+Pillow
+pydantic
+orjson
+reportlab
