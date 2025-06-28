@@ -6,17 +6,7 @@ This document provides instructions for AI agents working in this repository.
 Automate extraction of structured metadata from academic PDFs and generate narrative reviews of Mendelian Randomization (MR) studies.
 
 ## Directory Layout
-- `data/pdfs/` – raw PDF files.
-- `data/text/` – page wise JSON text extracted from PDFs.
-- `data/meta/` – JSON metadata produced by Agent 1.
-- `data/master.json` – combined metadata across papers.
-- `outputs/` – narrative reviews with citations.
-- `prompts/` – prompt templates for the agents.
-- `agent1/` – scripts for metadata extraction.
-- `agent2/` – scripts for generating reviews.
-- `tests/` – unit tests.
-
-Directories not present should be created as needed. Avoid committing large binaries such as PDFs.
+incomplete-- to be written at a later date. 
 
 ## Coding Conventions
 - Use **Python 3.12+**.
