@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "ai-litsearch-machine"
+version = "0.1.0"
+description = "Automate extraction of structured metadata from academic PDFs and generate narrative reviews."
+authors = ["AI Assistant <ai@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.0"
+"pdfminer.six" = "^20221105"
+openai = "^1.14"
+orjson = "^3.9"
+
+[tool.poetry.group.dev.dependencies]
+black = "*"
+ruff = "*"
+pytest = "*"
+isort = "*"
+pre-commit = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
