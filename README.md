@@ -27,6 +27,14 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+# The pipeline relies on the pre-1.0 OpenAI client
+pip install "openai<1.0"
+```
+
+Set your OpenAI API key in the ``OPENAI_API_KEY`` environment variable before running any pipeline steps:
+
+```bash
+export OPENAI_API_KEY=<your-key>
 ```
 
 ## Usage

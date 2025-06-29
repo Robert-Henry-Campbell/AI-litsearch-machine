@@ -5,7 +5,7 @@ from typing import Dict, List
 import time
 import orjson
 
-from utils.logger import get_logger
+from utils.logger import get_logger, format_exception
 
 # openai imported lazily for tests
 import openai
@@ -47,10 +47,10 @@ class OpenAINarrative:
             except Exception as exc:  # pragma: no cover - network errors
                 duration = time.time() - start_time
                 logger.error(
-                    "Narrative generation failed on attempt %s after %.2fs: %s",
+                    "Narrative generation failed on attempt %s after %.2fs (%s)",
                     attempt + 1,
                     duration,
-                    exc,
+                    format_exception(exc),
                 )
                 if attempt >= max_retries:
                     raise
