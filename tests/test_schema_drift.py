@@ -8,6 +8,7 @@ from schemas.metadata import PaperMetadata
 
 META_DIR = Path("data/meta")
 
+
 EXPECTED_KEYS = {
     "title",
     "authors",
@@ -32,3 +33,4 @@ def test_metadata_schema_keys() -> None:
 def test_metadata_conforms_to_schema(path: Path) -> None:
     data = orjson.loads(path.read_bytes())
     PaperMetadata.model_validate(data)
+
