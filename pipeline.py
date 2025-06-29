@@ -63,7 +63,7 @@ def generate_narrative(drug_name: str) -> Path:
             snippets.extend(retrieval.get_snippets(doi, drug_name))
     narrative = OpenAINarrative().generate(metadata, snippets)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_file = OUTPUT_DIR / f"{drug_name.replace(' ', '_')}_review.md"
+    out_file = OUTPUT_DIR / f"review_{drug_name.replace(' ', '_')}.md"
     out_file.write_text(narrative)
     return out_file
 

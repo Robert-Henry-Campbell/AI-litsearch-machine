@@ -2,14 +2,20 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
-import aggregate
-from ingest.collector import LOG_PATH
-from ingest.list_pdfs import DATA_DIR as PDF_DIR
-from extract.pdf_to_text import DATA_DIR as TEXT_DIR
-from agent1.metadata_extractor import META_DIR
-from pipeline import OUTPUT_DIR
+# Allow running this file directly without installing the package
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+import aggregate  # noqa: E402
+from ingest.collector import LOG_PATH  # noqa: E402
+from ingest.list_pdfs import DATA_DIR as PDF_DIR  # noqa: E402
+from extract.pdf_to_text import DATA_DIR as TEXT_DIR  # noqa: E402
+from agent1.metadata_extractor import META_DIR  # noqa: E402
+from pipeline import OUTPUT_DIR  # noqa: E402
 
 
 def _remove(path: Path) -> None:
