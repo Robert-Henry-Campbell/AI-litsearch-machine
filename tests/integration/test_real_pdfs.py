@@ -4,43 +4,40 @@ import pytest
 
 from ingest.collector import ingest_pdf
 from extract.pdf_to_text import pdf_to_text
+from schemas.metadata import PaperMetadata
+from utils.secrets import get_openai_api_key
 
+import importlib
+import sys
 
-@pytest.fixture(autouse=True)
-def fake_openai_key(monkeypatch):
-    monkeypatch.setattr("agent1.openai_client.get_openai_api_key", lambda: "key")
-
-
-class FakeClient:
-    def __init__(self, response):
-        self.response = response
-
-    def call(self, text, *, max_retries=2):
-        return self.response
-
-
-def valid_metadata() -> dict:
-    return {
-        "title": "T",
-        "authors": "A",
-        "doi": "10.1/test",
-        "pub_date": None,
-        "data_sources": None,
-        "omics_modalities": None,
-        "targets": None,
-        "p_threshold": None,
-        "ld_r2": None,
-    }
+if "openai" in sys.modules:
+    module = sys.modules["openai"]
+    if not hasattr(module, "OpenAI"):
+        importlib.reload(module)
 
 
 @pytest.mark.parametrize("pdf_path", sorted(Path("data/pdfs").glob("*.pdf")))
-def test_pdf_to_text_real_files(
+def test_full_extraction_real_file(
     tmp_path: Path, pdf_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path)
+    try:
+        get_openai_api_key()
+    except RuntimeError:
+        pytest.skip("OPENAI_API_KEY not found")
+
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")
+    monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
+
     ingest_pdf(pdf_path)
-    result = pdf_to_text(pdf_path)
-    assert result.pages
+    text_data = pdf_to_text(pdf_path)
+    assert text_data.pages
+
+    from agent1.metadata_extractor import MetadataExtractor
+
+    extractor = MetadataExtractor()
+    meta = extractor.extract(tmp_path / "text" / f"{pdf_path.stem}.json")
+    assert meta is not None
+    PaperMetadata.model_validate(meta.model_dump())
 
 
 @pytest.mark.parametrize("pdf_path", sorted(Path("data/pdfs").glob("*.pdf")))
@@ -63,3 +60,31 @@ def test_metadata_extractor_prompt_decode_error(
     from agent1.metadata_extractor import MetadataExtractor
 
     MetadataExtractor()
+
+
+def test_run_pipeline_real(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import pipeline
+
+    try:
+        get_openai_api_key()
+    except RuntimeError:
+        pytest.skip("OPENAI_API_KEY not found")
+
+    monkeypatch.setattr("ingest.collector.LOG_PATH", tmp_path / "log.jsonl")
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")
+    monkeypatch.setattr("pipeline.TEXT_DIR", tmp_path / "text")
+    monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
+    monkeypatch.setattr("aggregate.META_DIR", tmp_path / "meta")
+    monkeypatch.setattr("aggregate.MASTER_PATH", tmp_path / "master.json")
+    monkeypatch.setattr("aggregate.HISTORY_DIR", tmp_path / "history")
+    monkeypatch.setattr("agent2.retrieval.TEXT_DIR", tmp_path / "text")
+    monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "out")
+
+    pipeline.run_pipeline("data/pdfs", "sglt2i")
+
+    master = tmp_path / "master.json"
+    assert master.exists()
+    data = master.read_bytes()
+    assert data
+    out_file = tmp_path / "out" / "review_sglt2i.md"
+    assert out_file.exists()
