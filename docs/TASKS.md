@@ -8,7 +8,6 @@
 
 
 - Investigate why `OPENAI_API_KEY` is not detected during `test_openai_api_connection`.
-- Document the repository directory layout in `AGENTS.md`.
 - Decide on the supported `openai` version and update the code and documentation accordingly.
 - Remove unused `pandas` from `requirements.txt`.
 - Resolve the `fastapi` and `pydantic` version conflict reported by `pip check`.
