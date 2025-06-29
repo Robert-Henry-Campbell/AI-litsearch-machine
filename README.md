@@ -64,6 +64,12 @@ narrative = generator.generate(metadata, snippets)
 ```
 The system prompt for this agent lives in `prompts/agent2_system.txt`.
 
+Alternatively, run the CLI to produce a review for a specific drug:
+
+```bash
+python agent2/synthesiser.py --drug <drugname>
+```
+
 ## Output
 - Individual metadata JSONs in `data/meta/`.
 - Aggregated metadata in `data/master.json`.
