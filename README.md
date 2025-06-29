@@ -78,6 +78,12 @@ python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name>
 - Generated narrative reviews in `outputs/`.
 - For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
+## Telemetry & Logging
+All components now emit standardized logs using Python's ``logging`` module. The
+logger records timestamps, module names and log levels. OpenAI API calls include
+timing information and token usage statistics to help estimate costs and detect
+rate-limit issues.
+
 ## Contributing
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.
 

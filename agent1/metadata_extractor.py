@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import logging
+import time
 from hashlib import md5
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional, Union
@@ -8,10 +8,15 @@ from typing import Any, Dict, Iterable, Optional, Union
 import orjson
 from pydantic import ValidationError
 
+from utils.logger import get_logger
+
 from agent1.openai_client import OpenAIJSONCaller
 from schemas.metadata import PaperMetadata
 
 META_DIR = Path(__file__).resolve().parents[1] / "data" / "meta"
+
+
+logger = get_logger(__name__)
 
 
 class MetadataExtractor:
@@ -53,14 +58,39 @@ class MetadataExtractor:
     def extract(self, text_or_path: Union[str, Path]) -> Optional[PaperMetadata]:
         text, src_path = self._load_text(text_or_path)
         for attempt in range(2):
+            start = time.time()
             try:
                 result = self.client.call(text)
                 metadata = PaperMetadata.model_validate(result)
             except (ValidationError, Exception) as exc:
-                logging.error("Validation failed on attempt %s: %s", attempt + 1, exc)
+                duration = time.time() - start
+                logger.error(
+                    "Validation failed on attempt %s after %.2fs: %s",
+                    attempt + 1,
+                    duration,
+                    exc,
+                )
+                usage = getattr(self.client, "last_usage", None)
+                if usage:
+                    logger.info(
+                        "Tokens used: prompt=%s completion=%s total=%s",
+                        usage.get("prompt_tokens"),
+                        usage.get("completion_tokens"),
+                        usage.get("total_tokens"),
+                    )
                 if attempt == 1:
                     return None
             else:
+                duration = time.time() - start
+                logger.info("API Call Duration: %.2fs", duration)
+                usage = getattr(self.client, "last_usage", None)
+                if usage:
+                    logger.info(
+                        "Tokens used: prompt=%s completion=%s total=%s",
+                        usage.get("prompt_tokens"),
+                        usage.get("completion_tokens"),
+                        usage.get("total_tokens"),
+                    )
                 self._save(metadata, src_path, text)
                 return metadata
         return None

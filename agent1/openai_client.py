@@ -6,10 +6,15 @@ from typing import Any, Dict
 import orjson
 import time
 
+from utils.logger import get_logger
+
 # openai is imported lazily in tests via a stub if not installed
 import openai
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent1_prompt.txt"
+
+
+logger = get_logger(__name__)
 
 
 class OpenAIJSONCaller:
@@ -18,6 +23,7 @@ class OpenAIJSONCaller:
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
         self.prompt = PROMPT_PATH.read_text()
+        self.last_usage: Dict[str, int] | None = None
 
     def call(self, user_content: str, *, max_retries: int = 2) -> Dict[str, Any]:
         """Send ``user_content`` to the model and parse the JSON reply."""
@@ -27,18 +33,48 @@ class OpenAIJSONCaller:
         ]
         delay = 1.0
         for attempt in range(max_retries + 1):
-            response = openai.ChatCompletion.create(
-                model=self.model,
-                messages=messages,
-                response_format={"type": "json_object"},
-            )
-            content = response["choices"][0]["message"]["content"]
+            start_time = time.time()
             try:
-                return orjson.loads(content)
-            except orjson.JSONDecodeError:
+                response = openai.ChatCompletion.create(
+                    model=self.model,
+                    messages=messages,
+                    response_format={"type": "json_object"},
+                )
+            except Exception as exc:  # pragma: no cover - network errors
+                duration = time.time() - start_time
+                logger.error(
+                    "OpenAI request failed on attempt %s after %.2fs: %s",
+                    attempt + 1,
+                    duration,
+                    exc,
+                )
                 if attempt >= max_retries:
                     raise
                 time.sleep(delay)
                 delay *= 2
+                continue
+
+            duration = time.time() - start_time
+            self.last_usage = response.get("usage")
+            logger.info("API Call Duration: %.2fs", duration)
+            if self.last_usage:
+                logger.info(
+                    "Tokens used: prompt=%s completion=%s total=%s",
+                    self.last_usage.get("prompt_tokens"),
+                    self.last_usage.get("completion_tokens"),
+                    self.last_usage.get("total_tokens"),
+                )
+            content = response["choices"][0]["message"]["content"]
+            try:
+                result = orjson.loads(content)
+            except orjson.JSONDecodeError as exc:
+                logger.error("JSON decode error on attempt %s: %s", attempt + 1, exc)
+                if attempt >= max_retries:
+                    raise
+                time.sleep(delay)
+                delay *= 2
+            else:
+                logger.info("OpenAI call succeeded")
+                return result
         # Should never reach here
         raise RuntimeError("Failed to obtain JSON from OpenAI")
