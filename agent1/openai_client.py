@@ -24,8 +24,13 @@ def get_client() -> OpenAI:
     return _client
 
 
-AuthError = getattr(openai, "AuthenticationError", Exception)
-RateLimitError = getattr(openai, "RateLimitError", Exception)
+try:  # OpenAI SDK v1.x
+    AuthError = openai.AuthenticationError
+    RateLimitError = openai.RateLimitError
+except AttributeError:  # pragma: no cover - fallback for older SDKs
+    errors = getattr(openai, "error", type("error", (), {}))
+    AuthError = getattr(errors, "AuthenticationError", Exception)
+    RateLimitError = getattr(errors, "RateLimitError", Exception)
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent1_prompt.txt"
 
