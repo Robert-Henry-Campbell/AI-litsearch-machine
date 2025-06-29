@@ -64,10 +64,12 @@ narrative = generator.generate(metadata, snippets)
 ```
 The system prompt for this agent lives in `prompts/agent2_system.txt`.
 
-Alternatively, run the CLI to produce a review for a specific drug:
+
+6. Run the entire pipeline in one step:
 
 ```bash
-python agent2/synthesiser.py --drug <drugname>
+python pipeline.py --pdf-dir data/pdfs --drug <drug-name>
+
 ```
 
 ## Output
