@@ -39,12 +39,13 @@ export OPENAI_API_KEY=<your-key>
 
 ## Usage
 1. Place your academic PDFs in `data/pdfs/`.
-2. Run the ingestion and text extraction pipeline:
+2. Run ingestion and text extraction **for each PDF**:
 
 ```bash
-python ingest/collector.py
-python extract/pdf_to_text.py
+python ingest/collector.py path/to/paper.pdf
+python extract/pdf_to_text.py path/to/paper.pdf
 ```
+Both commands expect a single PDF file path and should be run for every paper.
 
 3. Execute Agent 1 to extract metadata:
 
@@ -72,6 +73,12 @@ narrative = generator.generate(metadata, snippets)
 ```
 The system prompt for this agent lives in `prompts/agent2_system.txt`.
 
+Once `master.json` exists you can also generate a review from the command line:
+
+```bash
+python agent2/synthesiser.py --drug <drug-name>
+```
+
 
 6. Run the entire pipeline in one step using the CLI script:
 
@@ -87,11 +94,12 @@ python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name>
 - For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
 ## Telemetry & Logging
-All components now emit standardized logs using Python's ``logging`` module. The
-logger records timestamps, module names and log levels. OpenAI API calls include
-timing information and token usage statistics to help estimate costs and detect
-rate-limit issues. The pipeline also logs the duration and memory delta of each
-major step so you can identify slow stages.
+Most modules emit standardized logs using Python's ``logging`` module. The
+pipeline and OpenAI helpers record timestamps, log levels and token usage.
+These logs include API timing information to help estimate costs and detect
+rate-limit issues. The pipeline also reports the duration and memory delta of
+each major step so you can identify slow stages. The ingestion and PDF
+extraction scripts simply produce output files and do not currently log.
 
 ## Contributing
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.
