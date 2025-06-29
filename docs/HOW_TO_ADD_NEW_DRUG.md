@@ -13,7 +13,7 @@ Run the end-to-end pipeline from the repository root:
 python run_pipeline.py --pdf_dir data/new_pdfs --drug <your_drug_name>
 ```
 
-Make sure the ``OPENAI_API_KEY`` environment variable is set and that you installed ``openai<1.0``.
+Ensure the OpenAI API key is available via ``OPENAI_API_KEY`` or the secret file ``/run/secrets/openai_api_key`` and that you installed ``openai<1.0``.
 
 This command ingests the PDFs, extracts text, gathers metadata, and generates a narrative review.
 

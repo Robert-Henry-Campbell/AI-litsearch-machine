@@ -6,6 +6,7 @@ import time
 import orjson
 
 from utils.logger import get_logger, format_exception
+from utils.secrets import get_openai_api_key
 
 # openai imported lazily for tests
 import openai
@@ -28,6 +29,7 @@ class OpenAINarrative:
 
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
+        openai.api_key = get_openai_api_key()
         with PROMPT_PATH.open("r", encoding="utf-8") as f:
             self.prompt = f.read()
 
