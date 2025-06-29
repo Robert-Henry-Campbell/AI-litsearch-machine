@@ -1,9 +1,9 @@
-pandas
-pdfminer.six
-pytesseract
-Pillow
-pydantic
-orjson
-reportlab
+pandas==2.3.0
+pdfminer.six==20250506
+pytesseract==0.3.13
+Pillow==11.2.1
+pydantic==2.11.7
+orjson==3.10.18
+reportlab==4.4.2
 
-openai
+openai==1.93.0
