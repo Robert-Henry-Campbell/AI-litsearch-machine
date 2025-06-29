@@ -38,6 +38,8 @@ Below is a brief description of the main scripts and where their outputs are wri
   command line.
 - `run_smoke_test.py` ingests a single PDF and prints the first few hundred
   characters from each page as a quick sanity check.
+- `utils/data_wipe.py` deletes generated data and logs. Pass `--with-pdfs` to
+  remove files in `data/pdfs/` as well.
 
 ## Features Under Development
 None at this time.
