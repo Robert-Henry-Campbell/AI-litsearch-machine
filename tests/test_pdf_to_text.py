@@ -24,7 +24,8 @@ def create_scanned_pdf(path: Path) -> None:
     img.save(path, "PDF")
 
 
-def test_extract_digital_pdf(tmp_path: Path) -> None:
+def test_extract_digital_pdf(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path)
     pdf = tmp_path / "digital.pdf"
     create_digital_pdf(pdf, pages=2)
     result = pdf_to_text(pdf)
@@ -32,9 +33,10 @@ def test_extract_digital_pdf(tmp_path: Path) -> None:
     assert all(page.text for page in result.pages)
 
 
-def test_ocr_fallback(tmp_path: Path) -> None:
+def test_ocr_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     if which("tesseract") is None:
         pytest.skip("tesseract not available")
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path)
     pdf = tmp_path / "scan.pdf"
     create_scanned_pdf(pdf)
     result = pdf_to_text(pdf)
