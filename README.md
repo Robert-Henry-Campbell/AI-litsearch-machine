@@ -64,10 +64,12 @@ narrative = generator.generate(metadata, snippets)
 ```
 The system prompt for this agent lives in `prompts/agent2_system.txt`.
 
+
 6. Run the entire pipeline in one step:
 
 ```bash
 python pipeline.py --pdf-dir data/pdfs --drug <drug-name>
+
 ```
 
 ## Output
