@@ -10,6 +10,35 @@ This project automates the extraction and synthesis of structured information fr
 - **Text Retrieval Helper**: Fetches keyword-based snippets from stored PDF text files for downstream RAG tasks.
 - **Narrative Review Generation (Agent 2)**: Generates peer-review style summaries using `agent2/openai_narrative.py`.
 
+## Script Overview
+Below is a brief description of the main scripts and where their outputs are written.
+
+- `ingest/collector.py` logs each PDF's checksum so it is only processed once.
+  It appends a JSON line to `ingestion_log.jsonl` in the repository root.
+- `extract/pdf_to_text.py` converts a PDF into a JSON file of page texts and
+  saves it under `data/text/`.
+- `agent1/openai_client.py` and `agent1/metadata_extractor.py` call the OpenAI
+  API to extract structured metadata.  Each result is written to
+  `data/meta/<doi>.json` (the filename falls back to a hash if no DOI is
+  available).
+- `aggregate.py` validates all metadata files and combines them into
+  `data/master.json`. Existing masters are backed up to `data/master_history/`,
+  and any invalid files are logged to `data/aggregation_errors.log`.
+- `utils/json_validator.py` checks every JSON file for UTF‑8 encoding and valid
+  structure. It prints results to the console without writing new files.
+- `agent2/retrieval.py` loads page text from `data/text/` and returns short
+  excerpts around a keyword for downstream use.
+- `agent2/openai_narrative.py` uses the OpenAI API to turn metadata and
+  snippets into a narrative review string.
+- `agent2/synthesiser.py` is a command-line wrapper that filters `master.json`
+  by drug, gathers snippets, and writes a Markdown review to the `outputs/`
+  directory.
+- `pipeline.py` and `run_pipeline.py` orchestrate the entire workflow—ingestion,
+  metadata extraction, aggregation and narrative generation—when run from the
+  command line.
+- `run_smoke_test.py` ingests a single PDF and prints the first few hundred
+  characters from each page as a quick sanity check.
+
 ## Features Under Development
 None at this time.
 
