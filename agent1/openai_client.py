@@ -10,7 +10,9 @@ from utils.logger import get_logger, format_exception
 from utils.secrets import get_openai_api_key
 
 # openai is imported lazily in tests via a stub if not installed
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=get_openai_api_key())
 
 AuthError = getattr(openai, "error", type("error", (), {})).__dict__.get(
     "AuthenticationError", Exception
@@ -30,7 +32,6 @@ class OpenAIJSONCaller:
 
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
-        openai.api_key = get_openai_api_key()
         with PROMPT_PATH.open("r", encoding="utf-8") as f:
             self.prompt = f.read()
         self.last_usage: Dict[str, int] | None = None
@@ -45,11 +46,9 @@ class OpenAIJSONCaller:
         for attempt in range(max_retries + 1):
             start_time = time.time()
             try:
-                response = openai.ChatCompletion.create(
-                    model=self.model,
-                    messages=messages,
-                    response_format={"type": "json_object"},
-                )
+                response = client.chat.completions.create(model=self.model,
+                messages=messages,
+                response_format={"type": "json_object"})
             except AuthError as exc:  # pragma: no cover - auth errors
                 duration = time.time() - start_time
                 logger.error(
@@ -86,7 +85,7 @@ class OpenAIJSONCaller:
                 continue
 
             duration = time.time() - start_time
-            self.last_usage = response.get("usage")
+            self.last_usage = response.usage
             logger.info("API Call Duration: %.2fs", duration)
             if self.last_usage:
                 logger.info(
@@ -95,7 +94,7 @@ class OpenAIJSONCaller:
                     self.last_usage.get("completion_tokens"),
                     self.last_usage.get("total_tokens"),
                 )
-            content = response["choices"][0]["message"]["content"]
+            content = response.choices[0].message.content
             try:
                 result = orjson.loads(content)
             except orjson.JSONDecodeError as exc:

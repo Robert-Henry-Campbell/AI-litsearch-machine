@@ -9,7 +9,9 @@ from utils.logger import get_logger, format_exception
 from utils.secrets import get_openai_api_key
 
 # openai imported lazily for tests
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=get_openai_api_key())
 
 AuthError = getattr(openai, "error", type("error", (), {})).__dict__.get(
     "AuthenticationError", Exception
@@ -29,7 +31,6 @@ class OpenAINarrative:
 
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
-        openai.api_key = get_openai_api_key()
         with PROMPT_PATH.open("r", encoding="utf-8") as f:
             self.prompt = f.read()
 
@@ -51,9 +52,7 @@ class OpenAINarrative:
         for attempt in range(max_retries + 1):
             start_time = time.time()
             try:
-                response = openai.ChatCompletion.create(
-                    model=self.model, messages=messages
-                )
+                response = client.chat.completions.create(model=self.model, messages=messages)
             except AuthError as exc:  # pragma: no cover - auth errors
                 duration = time.time() - start_time
                 logger.error(
@@ -90,7 +89,7 @@ class OpenAINarrative:
                 continue
 
             duration = time.time() - start_time
-            usage = response.get("usage")
+            usage = response.usage
             logger.info("API Call Duration: %.2fs", duration)
             if usage:
                 logger.info(
@@ -99,7 +98,7 @@ class OpenAINarrative:
                     usage.get("completion_tokens"),
                     usage.get("total_tokens"),
                 )
-            content = response["choices"][0]["message"]["content"]
+            content = response.choices[0].message.content
             logger.info("Narrative generation succeeded")
             return content
         raise RuntimeError("Failed to obtain narrative from OpenAI")
