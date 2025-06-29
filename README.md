@@ -8,9 +8,10 @@ This project automates the extraction and synthesis of structured information fr
 - **Metadata Extraction (Agent 1)**: Uses the OpenAI API to pull key metadata fields into JSON.
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
 - **Text Retrieval Helper**: Fetches keyword-based snippets from stored PDF text files for downstream RAG tasks.
+- **Narrative Review Generation (Agent 2)**: Generates peer-review style summaries using `agent2/openai_narrative.py`.
 
 ## Features Under Development
-- **Narrative Review Generation (Agent 2)**: Prompt template available in `prompts/agent2_system.txt`; full automation is still under development.
+None at this time.
 
 ## Installation
 Clone the repository and create a virtual environment:
@@ -51,10 +52,15 @@ python aggregate.py
 This command reports how many files were aggregated and any that were skipped due
 to validation errors.
 
-5. Generate narrative reviews with Agent 2:
+5. Generate narrative reviews with Agent 2 programmatically:
 
-```bash
-python agent2/synthesiser.py
+```python
+from agent2.openai_narrative import OpenAINarrative
+
+generator = OpenAINarrative()
+metadata = ...  # load master.json
+snippets = ...  # collect text snippets
+narrative = generator.generate(metadata, snippets)
 ```
 The system prompt for this agent lives in `prompts/agent2_system.txt`.
 
