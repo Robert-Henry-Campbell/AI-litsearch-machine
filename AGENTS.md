@@ -30,4 +30,8 @@ incomplete-- to be written at a later date.
 - Summarize changes and testing performed in the PR description.
 - Ensure all tests pass.
 
+## Documentation Updates
+- Whenever new functionality or files are added, update `README.md` with a brief explanation of how they work.
+- If `README.md` marked a feature as "under development" and you implement it, remove that notice.
+
 These instructions apply to all files in the repository.

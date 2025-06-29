@@ -2,12 +2,14 @@
 
 This project automates the extraction and synthesis of structured information from academic PDFs. It is designed to streamline literature reviews of Mendelian Randomization (MR) studies across various pharmacological agents.
 
-## Features
+## Implemented Features
 - **PDF Ingestion**: Automated collection and logging of academic PDFs.
 - **Text Extraction**: Conversion of PDFs to structured, page-wise text files.
 - **Metadata Extraction (Agent 1)**: Uses the OpenAI API to pull key metadata fields into JSON.
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
-- **Narrative Review Generation (Agent 2)**: Generates structured narrative reviews from the aggregated data and extracted text.
+
+## Features Under Development
+- **Narrative Review Generation (Agent 2)**: Planned support for creating narrative reviews from the aggregated data and extracted text.
 
 ## Installation
 Clone the repository and create a virtual environment:
