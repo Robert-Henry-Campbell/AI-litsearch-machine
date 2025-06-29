@@ -28,6 +28,12 @@ fake_chat = FakeChatCompletion()
 fake_openai.ChatCompletion = fake_chat
 sys.modules["openai"] = fake_openai
 
+
+@pytest.fixture(autouse=True)
+def fake_openai_key(monkeypatch):
+    monkeypatch.setattr("agent2.openai_narrative.get_openai_api_key", lambda: "key")
+
+
 from agent2.openai_narrative import OpenAINarrative  # noqa: E402
 
 
