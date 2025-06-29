@@ -62,7 +62,7 @@ pip install -r requirements.txt
 pip install "openai<1.0"
 ```
 
-Set your OpenAI API key in the ``OPENAI_API_KEY`` environment variable before running any pipeline steps:
+Set your OpenAI API key in the ``OPENAI_API_KEY`` environment variable before running any pipeline steps. The key must be manually added as a secret in your agent environment because it cannot be stored in the repository:
 
 ```bash
 export OPENAI_API_KEY=<your-key>
