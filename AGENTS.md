@@ -6,7 +6,22 @@ This document provides instructions for AI agents working in this repository.
 Automate extraction of structured metadata from academic PDFs and generate narrative reviews of Mendelian Randomization (MR) studies.
 
 ## Directory Layout
-incomplete-- to be written at a later date. 
+This repository is organized into the following top-level folders:
+
+- `agent1/` – metadata extraction helpers that call the OpenAI API.
+- `agent2/` – tools for generating narrative summaries from metadata.
+- `ingest/` – utilities for collecting PDFs and listing files to process.
+- `extract/` – converts PDFs into JSON files of page text.
+- `data/` – stores intermediate outputs such as `meta/`, `text/` and
+  `master.json`.
+- `outputs/` – final narrative reviews written by the synthesiser.
+- `prompts/` – system prompts and templates for the agents.
+- `schemas/` – pydantic models describing data structures.
+- `tests/` – unit and integration tests.
+- `utils/` – shared helper modules including logging and secrets management.
+
+Key entry points include `pipeline.py` and `run_pipeline.py` which orchestrate
+the full ingestion and synthesis flow.
 
 ## Coding Conventions
 - Use **Python 3.12+**.
