@@ -28,7 +28,8 @@ class OpenAINarrative:
 
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
-        self.prompt = PROMPT_PATH.read_text()
+        with PROMPT_PATH.open("r", encoding="utf-8") as f:
+            self.prompt = f.read()
 
     @staticmethod
     def _format_input(metadata: List[Dict], snippets: List[str]) -> str:
