@@ -1,10 +1,14 @@
 import sys
 import types
 from pathlib import Path
+import pytest
 
 
 # Setup fake openai module before import
 fake_openai = types.ModuleType("openai")
+fake_openai.error = types.SimpleNamespace()
+fake_openai.error.AuthenticationError = type("AuthError", (Exception,), {})
+fake_openai.error.RateLimitError = type("RateLimitError", (Exception,), {})
 
 
 class FakeChatCompletion:
@@ -52,6 +56,32 @@ def test_retry(monkeypatch, tmp_path):
     fake_chat.calls.clear()
     fake_chat.responses = [
         RuntimeError("bad"),
+        {"choices": [{"message": {"content": "ok"}}]},
+    ]
+    monkeypatch.setattr("time.sleep", lambda x: None)
+    gen = OpenAINarrative(model="test")
+    result = gen.generate([{"title": "T"}], ["s1"])
+    assert result == "ok"
+    assert len(fake_chat.calls) == 2
+
+
+def test_auth_error(monkeypatch, tmp_path):
+    path = setup_prompt(tmp_path)
+    monkeypatch.setattr("agent2.openai_narrative.PROMPT_PATH", path)
+    fake_chat.calls.clear()
+    fake_chat.responses = [fake_openai.error.AuthenticationError("bad key")]
+    gen = OpenAINarrative(model="test")
+    with pytest.raises(fake_openai.error.AuthenticationError):
+        gen.generate([{"title": "T"}], ["s1"])
+    assert len(fake_chat.calls) == 1
+
+
+def test_rate_limit(monkeypatch, tmp_path):
+    path = setup_prompt(tmp_path)
+    monkeypatch.setattr("agent2.openai_narrative.PROMPT_PATH", path)
+    fake_chat.calls.clear()
+    fake_chat.responses = [
+        fake_openai.error.RateLimitError("rate"),
         {"choices": [{"message": {"content": "ok"}}]},
     ]
     monkeypatch.setattr("time.sleep", lambda x: None)
