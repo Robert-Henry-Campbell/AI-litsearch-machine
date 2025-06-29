@@ -54,13 +54,12 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-Install dependencies:
+Install dependencies from the provided requirements file:
 
 ```bash
 pip install -r requirements.txt
-# The pipeline relies on the pre-1.0 OpenAI client
-pip install "openai<1.0"
 ```
+This installs the pinned OpenAI client and all other packages needed for the pipeline.
 
 Provide your OpenAI API key via the ``OPENAI_API_KEY`` environment variable or
 as a Docker secret at ``/run/secrets/openai_api_key``. The key cannot be stored
