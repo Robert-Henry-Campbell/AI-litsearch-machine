@@ -76,6 +76,7 @@ python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name>
 - Individual metadata JSONs in `data/meta/`.
 - Aggregated metadata in `data/master.json`.
 - Generated narrative reviews in `outputs/`.
+- For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
 ## Contributing
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.
