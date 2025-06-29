@@ -38,6 +38,15 @@ PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent1_prompt.t
 logger = get_logger(__name__)
 
 
+def _usage_get(usage: Any, key: str) -> Any:
+    """Return token counts from either a dict or OpenAI usage object."""
+    if usage is None:
+        return None
+    if isinstance(usage, dict):
+        return usage.get(key)
+    return getattr(usage, key, None)
+
+
 class OpenAIJSONCaller:
     """Helper for calling OpenAI's chat completion API in JSON mode."""
 
@@ -104,9 +113,9 @@ class OpenAIJSONCaller:
             if self.last_usage:
                 logger.info(
                     "Tokens used: prompt=%s completion=%s total=%s",
-                    self.last_usage.get("prompt_tokens"),
-                    self.last_usage.get("completion_tokens"),
-                    self.last_usage.get("total_tokens"),
+                    _usage_get(self.last_usage, "prompt_tokens"),
+                    _usage_get(self.last_usage, "completion_tokens"),
+                    _usage_get(self.last_usage, "total_tokens"),
                 )
             content = response.choices[0].message.content
             try:

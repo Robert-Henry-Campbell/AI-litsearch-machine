@@ -32,6 +32,15 @@ PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent2_system.t
 logger = get_logger(__name__)
 
 
+def _usage_get(usage, key):
+    """Return token counts from a dict or OpenAI usage object."""
+    if usage is None:
+        return None
+    if isinstance(usage, dict):
+        return usage.get(key)
+    return getattr(usage, key, None)
+
+
 class OpenAINarrative:
     """Helper for generating narrative reviews using OpenAI."""
 
@@ -104,9 +113,9 @@ class OpenAINarrative:
             if usage:
                 logger.info(
                     "Tokens used: prompt=%s completion=%s total=%s",
-                    usage.get("prompt_tokens"),
-                    usage.get("completion_tokens"),
-                    usage.get("total_tokens"),
+                    _usage_get(usage, "prompt_tokens"),
+                    _usage_get(usage, "completion_tokens"),
+                    _usage_get(usage, "total_tokens"),
                 )
             content = response.choices[0].message.content
             logger.info("Narrative generation succeeded")

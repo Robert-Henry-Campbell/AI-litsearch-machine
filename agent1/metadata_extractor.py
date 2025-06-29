@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 from utils.logger import get_logger, format_exception
 
-from agent1.openai_client import OpenAIJSONCaller
+from agent1.openai_client import OpenAIJSONCaller, _usage_get
 from schemas.metadata import PaperMetadata
 
 META_DIR = Path(__file__).resolve().parents[1] / "data" / "meta"
@@ -74,9 +74,9 @@ class MetadataExtractor:
                 if usage:
                     logger.info(
                         "Tokens used: prompt=%s completion=%s total=%s",
-                        usage.get("prompt_tokens"),
-                        usage.get("completion_tokens"),
-                        usage.get("total_tokens"),
+                        _usage_get(usage, "prompt_tokens"),
+                        _usage_get(usage, "completion_tokens"),
+                        _usage_get(usage, "total_tokens"),
                     )
                 if attempt == 1:
                     return None
@@ -87,9 +87,9 @@ class MetadataExtractor:
                 if usage:
                     logger.info(
                         "Tokens used: prompt=%s completion=%s total=%s",
-                        usage.get("prompt_tokens"),
-                        usage.get("completion_tokens"),
-                        usage.get("total_tokens"),
+                        _usage_get(usage, "prompt_tokens"),
+                        _usage_get(usage, "completion_tokens"),
+                        _usage_get(usage, "total_tokens"),
                     )
                 self._save(metadata, src_path, text)
                 return metadata
