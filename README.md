@@ -9,7 +9,7 @@ This project automates the extraction and synthesis of structured information fr
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
 
 ## Features Under Development
-- **Narrative Review Generation (Agent 2)**: Planned support for creating narrative reviews from the aggregated data and extracted text.
+- **Narrative Review Generation (Agent 2)**: Prompt template available in `prompts/agent2_system.txt`; full automation is still under development.
 
 ## Installation
 Clone the repository and create a virtual environment:
@@ -55,6 +55,7 @@ to validation errors.
 ```bash
 python agent2/synthesiser.py
 ```
+The system prompt for this agent lives in `prompts/agent2_system.txt`.
 
 ## Output
 - Individual metadata JSONs in `data/meta/`.
