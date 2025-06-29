@@ -29,7 +29,8 @@ class OpenAIJSONCaller:
 
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
-        self.prompt = PROMPT_PATH.read_text()
+        # Read prompt bytes and decode explicitly to avoid locale issues
+        self.prompt = PROMPT_PATH.read_bytes().decode("utf-8")
         self.last_usage: Dict[str, int] | None = None
 
     def call(self, user_content: str, *, max_retries: int = 2) -> Dict[str, Any]:
