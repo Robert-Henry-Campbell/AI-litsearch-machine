@@ -7,6 +7,7 @@ import orjson
 import time
 
 from utils.logger import get_logger, format_exception
+from utils.secrets import get_openai_api_key
 
 # openai is imported lazily in tests via a stub if not installed
 import openai
@@ -29,6 +30,7 @@ class OpenAIJSONCaller:
 
     def __init__(self, model: str = "gpt-4-0125-preview") -> None:
         self.model = model
+        openai.api_key = get_openai_api_key()
         with PROMPT_PATH.open("r", encoding="utf-8") as f:
             self.prompt = f.read()
         self.last_usage: Dict[str, int] | None = None

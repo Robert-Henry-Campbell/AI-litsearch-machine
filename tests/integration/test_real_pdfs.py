@@ -6,6 +6,11 @@ from ingest.collector import ingest_pdf
 from extract.pdf_to_text import pdf_to_text
 
 
+@pytest.fixture(autouse=True)
+def fake_openai_key(monkeypatch):
+    monkeypatch.setattr("agent1.openai_client.get_openai_api_key", lambda: "key")
+
+
 class FakeClient:
     def __init__(self, response):
         self.response = response

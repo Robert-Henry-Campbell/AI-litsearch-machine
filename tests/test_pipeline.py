@@ -1,9 +1,16 @@
 from pathlib import Path
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import pytest
 
 import pipeline
 from schemas.metadata import PaperMetadata
+
+
+@pytest.fixture(autouse=True)
+def fake_openai_key(monkeypatch):
+    monkeypatch.setattr("agent1.openai_client.get_openai_api_key", lambda: "key")
+    monkeypatch.setattr("agent2.openai_narrative.get_openai_api_key", lambda: "key")
 
 
 def create_pdf(path: Path) -> None:

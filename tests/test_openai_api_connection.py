@@ -1,13 +1,13 @@
-import os
-
 import openai
 import pytest
+from utils.secrets import get_openai_api_key
 
 
 def test_openai_api_connection():
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        pytest.skip("OPENAI_API_KEY not set")
+    try:
+        api_key = get_openai_api_key()
+    except RuntimeError:
+        pytest.skip("OPENAI_API_KEY not found")
 
     client = openai.OpenAI(api_key=api_key)
     response = client.chat.completions.create(

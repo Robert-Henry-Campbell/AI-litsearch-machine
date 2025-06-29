@@ -1,8 +1,8 @@
 import sys
 import types
+import pytest
 
 import orjson
-import pytest
 
 # Create a fake openai module
 fake_openai = types.ModuleType("openai")
@@ -27,6 +27,12 @@ class FakeChatCompletion:
 fake_chat = FakeChatCompletion()
 fake_openai.ChatCompletion = fake_chat
 sys.modules["openai"] = fake_openai
+
+
+@pytest.fixture(autouse=True)
+def fake_openai_key(monkeypatch):
+    monkeypatch.setattr("agent1.openai_client.get_openai_api_key", lambda: "key")
+
 
 from agent1.openai_client import OpenAIJSONCaller  # noqa: E402
 
