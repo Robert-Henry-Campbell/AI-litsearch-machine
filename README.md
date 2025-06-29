@@ -83,4 +83,5 @@ Contributions are welcome! Fork the repository and submit a pull request with im
 
 ## Continuous Integration
 A GitHub Actions workflow automatically lints Markdown files in the `outputs/` directory on pull requests to the `main` branch.
+Another workflow runs a schema drift unit test to ensure that `PaperMetadata` does not change unexpectedly.
 
