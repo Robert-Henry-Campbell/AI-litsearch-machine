@@ -10,16 +10,22 @@ from utils.logger import get_logger, format_exception
 from utils.secrets import get_openai_api_key
 
 # openai is imported lazily in tests via a stub if not installed
+import openai
 from openai import OpenAI
 
-client = OpenAI(api_key=get_openai_api_key())
+_client: OpenAI | None = None
 
-AuthError = getattr(openai, "error", type("error", (), {})).__dict__.get(
-    "AuthenticationError", Exception
-)
-RateLimitError = getattr(openai, "error", type("error", (), {})).__dict__.get(
-    "RateLimitError", Exception
-)
+
+def get_client() -> OpenAI:
+    """Return a cached OpenAI client."""
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=get_openai_api_key())
+    return _client
+
+
+AuthError = getattr(openai, "AuthenticationError", Exception)
+RateLimitError = getattr(openai, "RateLimitError", Exception)
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent1_prompt.txt"
 
@@ -43,12 +49,15 @@ class OpenAIJSONCaller:
             {"role": "user", "content": user_content},
         ]
         delay = 1.0
+        client = get_client()
         for attempt in range(max_retries + 1):
             start_time = time.time()
             try:
-                response = client.chat.completions.create(model=self.model,
-                messages=messages,
-                response_format={"type": "json_object"})
+                response = client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    response_format={"type": "json_object"},
+                )
             except AuthError as exc:  # pragma: no cover - auth errors
                 duration = time.time() - start_time
                 logger.error(

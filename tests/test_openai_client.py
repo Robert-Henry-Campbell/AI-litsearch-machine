@@ -6,9 +6,12 @@ import orjson
 
 # Create a fake openai module
 fake_openai = types.ModuleType("openai")
-fake_openai.error = types.SimpleNamespace()
-fake_openai.error.AuthenticationError = type("AuthError", (Exception,), {})
-fake_openai.error.RateLimitError = type("RateLimitError", (Exception,), {})
+fake_openai.AuthenticationError = type("AuthError", (Exception,), {})
+fake_openai.RateLimitError = type("RateLimitError", (Exception,), {})
+fake_openai.error = types.SimpleNamespace(
+    AuthenticationError=fake_openai.AuthenticationError,
+    RateLimitError=fake_openai.RateLimitError,
+)
 
 
 class FakeChatCompletion:
@@ -21,11 +24,28 @@ class FakeChatCompletion:
         resp = self.responses.pop(0)
         if isinstance(resp, Exception):
             raise resp
+        if isinstance(resp, dict):
+            usage = resp.get("usage", {})
+
+            def to_ns(obj):
+                if isinstance(obj, dict):
+                    return types.SimpleNamespace(
+                        **{k: to_ns(v) for k, v in obj.items()}
+                    )
+                if isinstance(obj, list):
+                    return [to_ns(x) for x in obj]
+                return obj
+
+            ns = to_ns({k: v for k, v in resp.items() if k != "usage"})
+            ns.usage = usage
+            return ns
         return resp
 
 
 fake_chat = FakeChatCompletion()
+fake_client = types.SimpleNamespace(chat=types.SimpleNamespace(completions=fake_chat))
 fake_openai.ChatCompletion = fake_chat
+fake_openai.OpenAI = lambda api_key=None: fake_client
 sys.modules["openai"] = fake_openai
 
 
