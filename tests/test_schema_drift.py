@@ -33,4 +33,3 @@ def test_metadata_schema_keys() -> None:
 def test_metadata_conforms_to_schema(path: Path) -> None:
     data = orjson.loads(path.read_bytes())
     PaperMetadata.model_validate(data)
-
