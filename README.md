@@ -84,3 +84,41 @@ Contributions are welcome! Fork the repository and submit a pull request with im
 ## Continuous Integration
 A GitHub Actions workflow automatically lints Markdown files in the `outputs/` directory on pull requests to the `main` branch.
 
+## API Cost Estimation
+
+The pipeline uses the OpenAI API (for example, GPT-4-Turbo), which is billed per
+1,000 tokens. Costs may change, so always check the
+[OpenAI Pricing](https://openai.com/pricing) page for the latest numbers. At the
+time of writing, GPT-4-Turbo is roughly **$0.01 per 1,000 tokens**.
+
+Estimating cost for a run is easiest when you know roughly how many tokens each
+step consumes:
+
+- **Metadata extraction**: A typical academic paper requires around 2,000 tokens
+  from the API, or about **$0.02 per paper**.
+- **Narrative synthesis**: Producing a narrative review for a single drug usually
+  takes 4,000–6,000 tokens (**$0.04–$0.06 per review**).
+
+For example, processing metadata for 100 papers would cost approximately:
+
+- `100 × $0.02 = $2.00` for metadata extraction
+- Narrative review costs then scale with the number of drugs you review (roughly
+  `$0.05` each).
+
+Use these numbers as a starting point to budget larger runs.
+
+## API Rate-limit Handling
+
+OpenAI imposes rate limits to ensure fair use of the API. If you exceed these
+limits, the API will return a **429 Too Many Requests** error. When this occurs,
+implement an exponential back-off strategy before retrying:
+
+1. First retry after waiting **1 second**.
+2. Second retry after waiting **4 seconds**.
+3. Third retry after waiting **16 seconds**.
+
+Additionally, limit the number of concurrent API calls to reduce the likelihood
+of hitting rate limits. See the
+[OpenAI rate limit documentation](https://platform.openai.com/docs/guides/rate-limits)
+for more details.
+
