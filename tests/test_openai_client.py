@@ -6,6 +6,9 @@ import pytest
 
 # Create a fake openai module
 fake_openai = types.ModuleType("openai")
+fake_openai.error = types.SimpleNamespace()
+fake_openai.error.AuthenticationError = type("AuthError", (Exception,), {})
+fake_openai.error.RateLimitError = type("RateLimitError", (Exception,), {})
 
 
 class FakeChatCompletion:
@@ -15,7 +18,10 @@ class FakeChatCompletion:
 
     def create(self, *args, **kwargs):
         self.calls.append({"args": args, "kwargs": kwargs})
-        return self.responses.pop(0)
+        resp = self.responses.pop(0)
+        if isinstance(resp, Exception):
+            raise resp
+        return resp
 
 
 fake_chat = FakeChatCompletion()
@@ -73,3 +79,29 @@ def test_fail(monkeypatch, tmp_path):
     with pytest.raises(orjson.JSONDecodeError):
         client.call("hello")
     assert len(fake_chat.calls) == 3
+
+
+def test_auth_error(monkeypatch, tmp_path):
+    path = setup_prompt(tmp_path)
+    monkeypatch.setattr("agent1.openai_client.PROMPT_PATH", path)
+    fake_chat.calls.clear()
+    fake_chat.responses = [fake_openai.error.AuthenticationError("bad key")]
+    client = OpenAIJSONCaller(model="test")
+    with pytest.raises(fake_openai.error.AuthenticationError):
+        client.call("hello")
+    assert len(fake_chat.calls) == 1
+
+
+def test_rate_limit(monkeypatch, tmp_path):
+    path = setup_prompt(tmp_path)
+    monkeypatch.setattr("agent1.openai_client.PROMPT_PATH", path)
+    fake_chat.calls.clear()
+    fake_chat.responses = [
+        fake_openai.error.RateLimitError("rate"),
+        {"choices": [{"message": {"content": '{"ok": 3}'}}]},
+    ]
+    monkeypatch.setattr("time.sleep", lambda x: None)
+    client = OpenAIJSONCaller(model="test")
+    result = client.call("hello")
+    assert result == {"ok": 3}
+    assert len(fake_chat.calls) == 2
