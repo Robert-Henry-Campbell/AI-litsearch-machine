@@ -1,5 +1,6 @@
 from pathlib import Path
 from shutil import which
+import pytesseract
 
 import pytest
 from PIL import Image, ImageDraw
@@ -41,3 +42,18 @@ def test_ocr_fallback(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     create_scanned_pdf(pdf)
     result = pdf_to_text(pdf)
     assert any("Scanned text" in page.text for page in result.pages)
+
+
+def test_no_tesseract(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path)
+
+    def raise_error(*args, **kwargs):
+        raise pytesseract.TesseractNotFoundError()
+
+    monkeypatch.setattr("pytesseract.get_tesseract_version", raise_error)
+
+    pdf = tmp_path / "scan_missing.pdf"
+    create_scanned_pdf(pdf)
+
+    result = pdf_to_text(pdf)
+    assert len(result.pages) == 1

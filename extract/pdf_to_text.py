@@ -55,7 +55,11 @@ def pdf_to_text(path: str | Path) -> PDFText:
     texts = extract_text(pdf_path)
     blank_pages = sum(1 for t in texts if not t)
     if texts and blank_pages / len(texts) > 0.5:
-        if pytesseract.get_tesseract_version() is not None:
+        try:
+            pytesseract.get_tesseract_version()
+        except pytesseract.TesseractNotFoundError:
+            pass
+        else:
             texts = ocr_text(pdf_path, texts)
     data = PDFText(
         pages=[Page(page=i + 1, text=txt) for i, txt in enumerate(texts)],
