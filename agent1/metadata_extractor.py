@@ -8,7 +8,7 @@ from typing import Any, Dict, Iterable, Optional, Union
 import orjson
 from pydantic import ValidationError
 
-from utils.logger import get_logger
+from utils.logger import get_logger, format_exception
 
 from agent1.openai_client import OpenAIJSONCaller
 from schemas.metadata import PaperMetadata
@@ -65,10 +65,10 @@ class MetadataExtractor:
             except (ValidationError, Exception) as exc:
                 duration = time.time() - start
                 logger.error(
-                    "Validation failed on attempt %s after %.2fs: %s",
+                    "Validation failed on attempt %s after %.2fs (%s)",
                     attempt + 1,
                     duration,
-                    exc,
+                    format_exception(exc),
                 )
                 usage = getattr(self.client, "last_usage", None)
                 if usage:
