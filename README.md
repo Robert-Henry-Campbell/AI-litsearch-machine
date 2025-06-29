@@ -52,7 +52,15 @@ python aggregate.py
 This command reports how many files were aggregated and any that were skipped due
 to validation errors.
 
-5. Generate narrative reviews with Agent 2 programmatically:
+5. Validate JSON integrity:
+
+```bash
+python utils/json_validator.py
+```
+This checks all files in `data/meta/` and `data/master.json` for UTF-8 encoding
+and valid JSON structure.
+
+6. Generate narrative reviews with Agent 2 programmatically:
 
 ```python
 from agent2.openai_narrative import OpenAINarrative
