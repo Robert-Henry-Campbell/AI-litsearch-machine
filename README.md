@@ -64,3 +64,6 @@ python agent2/synthesiser.py
 ## Contributing
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.
 
+## Continuous Integration
+A GitHub Actions workflow automatically lints Markdown files in the `outputs/` directory on pull requests to the `main` branch.
+
