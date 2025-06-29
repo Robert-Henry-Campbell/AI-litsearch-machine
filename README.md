@@ -79,7 +79,13 @@ Both commands expect a single PDF file path and should be run for every paper.
 3. Execute Agent 1 to extract metadata:
 
 ```bash
-python agent1/metadata_extractor.py
+python -m agent1.metadata_extractor
+```
+
+If you prefer running the script directly, set `PYTHONPATH=$(pwd)` first:
+
+```bash
+PYTHONPATH=$(pwd) python agent1/metadata_extractor.py
 ```
 
 4. Aggregate metadata:
