@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from pathlib import Path
 
@@ -27,7 +26,9 @@ def test_aggregate_creates_master(
     history_dir = tmp_path / "history"
     monkeypatch.setattr(aggregate, "HISTORY_DIR", history_dir)
 
-    aggregate.aggregate_metadata()
+    records, skipped, backup = aggregate.aggregate_metadata()
+    assert skipped == 0
+    assert backup is None
 
     assert master_path.exists()
     data = orjson.loads(master_path.read_bytes())
@@ -53,9 +54,9 @@ def test_backup(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(aggregate, "datetime", DummyDT)
 
-    aggregate.aggregate_metadata()
-
-    backup = history_dir / "master_20240515T134500.json"
+    records, skipped, backup = aggregate.aggregate_metadata()
+    assert skipped == 0
+    assert backup == history_dir / "master_20240515T134500.json"
     assert backup.exists()
     assert backup.read_text() == "old"
 
@@ -77,7 +78,9 @@ def test_invalid_json_logs_error(
     log_path = tmp_path / "err.log"
     monkeypatch.setattr(aggregate, "ERROR_LOG", log_path)
 
-    aggregate.aggregate_metadata()
+    records, skipped, backup = aggregate.aggregate_metadata()
+    assert skipped == 1
+    assert backup is None
 
     assert master_path.exists()
     data = orjson.loads(master_path.read_bytes())

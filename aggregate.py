@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import logging
 
@@ -29,37 +29,52 @@ def _log_error(path: Path, exc: Exception) -> None:
     logging.error("Invalid JSON in file %s: %s", path, exc)
 
 
-def _load_metadata() -> List[PaperMetadata]:
+def _load_metadata() -> Tuple[List[PaperMetadata], int]:
     META_DIR.mkdir(parents=True, exist_ok=True)
     records: List[PaperMetadata] = []
+    invalid = 0
     for path in sorted(META_DIR.glob("*.json")):
         try:
             data = orjson.loads(path.read_bytes())
             record = PaperMetadata.model_validate(data)
         except (orjson.JSONDecodeError, ValidationError) as exc:
             _log_error(path, exc)
+            invalid += 1
             continue
         records.append(record)
-    return records
+    return records, invalid
 
 
-def _backup_master() -> None:
+def _backup_master() -> Path | None:
     if MASTER_PATH.exists():
         HISTORY_DIR.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%S")
         backup = HISTORY_DIR / f"master_{timestamp}.json"
         backup.write_bytes(MASTER_PATH.read_bytes())
+        return backup
+    return None
 
 
-def aggregate_metadata() -> List[PaperMetadata]:
-    records = _load_metadata()
-    _backup_master()
+def aggregate_metadata() -> Tuple[List[PaperMetadata], int, Path | None]:
+    records, skipped = _load_metadata()
+    backup = _backup_master()
     MASTER_PATH.write_bytes(
         orjson.dumps([r.model_dump() for r in records], option=orjson.OPT_INDENT_2)
     )
-    return records
+    return records, skipped, backup
+
+
+def main() -> None:
+    records, skipped, backup = aggregate_metadata()
+    print(f"Aggregated {len(records)} metadata files successfully.")
+    if skipped:
+        print(f"Skipped {skipped} invalid metadata files (see {ERROR_LOG.name}).")
+    else:
+        print("Skipped 0 invalid metadata files.")
+    if backup is not None:
+        rel_backup = backup.relative_to(DATA_DIR)
+        print(f"Backup created: {rel_backup}")
 
 
 if __name__ == "__main__":
-    aggregate_metadata()
-
+    main()
