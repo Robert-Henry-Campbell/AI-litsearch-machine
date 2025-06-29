@@ -14,7 +14,11 @@
 - Document the repository directory layout in `AGENTS.md`.
 - Decide on the supported `openai` version and update the code and documentation accordingly.
 - Remove unused `pandas` from `requirements.txt`.
+
+- Standardise narrative review filenames across the pipeline and synthesiser.
+
 - Resolve the `fastapi` and `pydantic` version conflict reported by `pip check`.
+
 
 - Fix `utils/data_wipe.py` so it can run directly without `ModuleNotFoundError`.
 
