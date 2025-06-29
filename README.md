@@ -138,6 +138,20 @@ python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name>
 - Generated narrative reviews in `outputs/`.
 - For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
+## Cleaning Up Generated Data
+
+Use `utils/data_wipe.py` to delete intermediate outputs and logs:
+
+```bash
+python utils/data_wipe.py
+```
+
+Raw PDFs in `data/pdfs/` remain untouched. To remove them as well, pass `--with-pdfs`:
+
+```bash
+python utils/data_wipe.py --with-pdfs
+```
+
 ## Telemetry & Logging
 Most modules emit standardized logs using Python's ``logging`` module. The
 pipeline and OpenAI helpers record timestamps, log levels and token usage.
