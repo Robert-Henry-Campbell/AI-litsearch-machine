@@ -47,6 +47,8 @@ python agent1/metadata_extractor.py
 ```bash
 python aggregate.py
 ```
+This command reports how many files were aggregated and any that were skipped due
+to validation errors.
 
 5. Generate narrative reviews with Agent 2:
 
