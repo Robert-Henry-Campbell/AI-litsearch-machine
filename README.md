@@ -27,6 +27,14 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+# The pipeline relies on the pre-1.0 OpenAI client
+pip install "openai<1.0"
+```
+
+Set your OpenAI API key in the ``OPENAI_API_KEY`` environment variable before running any pipeline steps:
+
+```bash
+export OPENAI_API_KEY=<your-key>
 ```
 
 ## Usage
@@ -52,7 +60,15 @@ python aggregate.py
 This command reports how many files were aggregated and any that were skipped due
 to validation errors.
 
-5. Generate narrative reviews with Agent 2 programmatically:
+5. Validate JSON integrity:
+
+```bash
+python utils/json_validator.py
+```
+This checks all files in `data/meta/` and `data/master.json` for UTF-8 encoding
+and valid JSON structure.
+
+6. Generate narrative reviews with Agent 2 programmatically:
 
 ```python
 from agent2.openai_narrative import OpenAINarrative
@@ -82,13 +98,15 @@ python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name>
 All components now emit standardized logs using Python's ``logging`` module. The
 logger records timestamps, module names and log levels. OpenAI API calls include
 timing information and token usage statistics to help estimate costs and detect
-rate-limit issues.
+rate-limit issues. The pipeline also logs the duration and memory delta of each
+major step so you can identify slow stages.
 
 ## Contributing
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.
 
 ## Continuous Integration
 A GitHub Actions workflow automatically lints Markdown files in the `outputs/` directory on pull requests to the `main` branch.
+Another workflow runs a schema drift unit test to ensure that `PaperMetadata` does not change unexpectedly.
 
 ## API Cost Estimation
 

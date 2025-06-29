@@ -6,10 +6,17 @@ from typing import Any, Dict
 import orjson
 import time
 
-from utils.logger import get_logger
+from utils.logger import get_logger, format_exception
 
 # openai is imported lazily in tests via a stub if not installed
 import openai
+
+AuthError = getattr(openai, "error", type("error", (), {})).__dict__.get(
+    "AuthenticationError", Exception
+)
+RateLimitError = getattr(openai, "error", type("error", (), {})).__dict__.get(
+    "RateLimitError", Exception
+)
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent1_prompt.txt"
 
@@ -40,13 +47,34 @@ class OpenAIJSONCaller:
                     messages=messages,
                     response_format={"type": "json_object"},
                 )
-            except Exception as exc:  # pragma: no cover - network errors
+            except AuthError as exc:  # pragma: no cover - auth errors
                 duration = time.time() - start_time
                 logger.error(
-                    "OpenAI request failed on attempt %s after %.2fs: %s",
+                    "Authentication failed after %.2fs: %s",
+                    duration,
+                    exc,
+                )
+                raise
+            except RateLimitError as exc:  # pragma: no cover - rate limit
+                duration = time.time() - start_time
+                logger.warning(
+                    "Rate limit hit on attempt %s after %.2fs: %s",
                     attempt + 1,
                     duration,
                     exc,
+                )
+                if attempt >= max_retries:
+                    raise
+                time.sleep(delay)
+                delay *= 2
+                continue
+            except Exception as exc:  # pragma: no cover - network errors
+                duration = time.time() - start_time
+                logger.error(
+                    "OpenAI request failed on attempt %s after %.2fs (%s)",
+                    attempt + 1,
+                    duration,
+                    format_exception(exc),
                 )
                 if attempt >= max_retries:
                     raise
@@ -68,7 +96,11 @@ class OpenAIJSONCaller:
             try:
                 result = orjson.loads(content)
             except orjson.JSONDecodeError as exc:
-                logger.error("JSON decode error on attempt %s: %s", attempt + 1, exc)
+                logger.error(
+                    "JSON decode error on attempt %s (%s)",
+                    attempt + 1,
+                    format_exception(exc),
+                )
                 if attempt >= max_retries:
                     raise
                 time.sleep(delay)
