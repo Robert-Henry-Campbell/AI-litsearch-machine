@@ -82,7 +82,8 @@ python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name>
 All components now emit standardized logs using Python's ``logging`` module. The
 logger records timestamps, module names and log levels. OpenAI API calls include
 timing information and token usage statistics to help estimate costs and detect
-rate-limit issues.
+rate-limit issues. The pipeline also logs the duration and memory delta of each
+major step so you can identify slow stages.
 
 ## Contributing
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.

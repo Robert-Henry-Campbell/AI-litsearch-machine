@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 import time
+import resource
+from dataclasses import dataclass
 
 from utils.logger import get_logger
 
@@ -18,6 +20,12 @@ from agent2 import retrieval
 OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
 
 logger = get_logger("pipeline")
+
+
+@dataclass
+class StepMetrics:
+    duration: float
+    memory_kb: int
 
 
 def ingest_pdfs(pdf_dir: str) -> List[Path]:
@@ -60,19 +68,29 @@ def generate_narrative(drug_name: str) -> Path:
     return out_file
 
 
-def timed_step(step_func, step_name: str) -> None:
+def timed_step(step_func, step_name: str, metrics: Dict[str, StepMetrics]) -> None:
     start = time.time()
+    start_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     step_func()
     duration = time.time() - start
-    logger.info("%s completed in %.2fs", step_name, duration)
+    end_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    mem_delta = end_mem - start_mem
+    logger.info("%s completed in %.2fs (%+d KB)", step_name, duration, mem_delta)
+    metrics[step_name] = StepMetrics(duration=duration, memory_kb=mem_delta)
 
 
 def run_pipeline(pdf_dir: str, drug_name: str) -> None:
     """Execute the full data processing pipeline."""
-    timed_step(lambda: ingest_pdfs(pdf_dir), "Ingestion")
-    timed_step(extract_metadata_from_text, "Metadata Extraction")
-    timed_step(aggregate.aggregate_metadata, "Aggregation")
-    timed_step(lambda: generate_narrative(drug_name), "Narrative Generation")
+    metrics: Dict[str, StepMetrics] = {}
+    timed_step(lambda: ingest_pdfs(pdf_dir), "Ingestion", metrics)
+    timed_step(extract_metadata_from_text, "Metadata Extraction", metrics)
+    timed_step(aggregate.aggregate_metadata, "Aggregation", metrics)
+    timed_step(lambda: generate_narrative(drug_name), "Narrative Generation", metrics)
+    logger.info("-- Performance Summary --")
+    for name, data in sorted(
+        metrics.items(), key=lambda x: x[1].duration, reverse=True
+    ):
+        logger.info("%-20s %.2fs %+d KB", name, data.duration, data.memory_kb)
 
 
 if __name__ == "__main__":
