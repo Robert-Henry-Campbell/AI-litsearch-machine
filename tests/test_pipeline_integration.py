@@ -52,5 +52,5 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
     for record in data:
         PaperMetadata.model_validate(record)
 
-    out_file = tmp_path / "outputs" / "TestDrug_review.md"
+    out_file = tmp_path / "outputs" / "review_TestDrug.md"
     assert out_file.exists()
