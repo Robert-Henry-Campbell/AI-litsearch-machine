@@ -69,6 +69,6 @@ def test_run_pipeline(monkeypatch, tmp_path):
     pipeline.run_pipeline(str(pdf_dir), "test")
 
     assert (tmp_path / "master.json").exists()
-    out_file = tmp_path / "out" / "test_review.md"
+    out_file = tmp_path / "out" / "review_test.md"
     assert out_file.exists()
     assert fake.calls
