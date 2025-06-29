@@ -35,3 +35,7 @@ incomplete-- to be written at a later date.
 - If `README.md` marked a feature as "under development" and you implement it, remove that notice.
 
 These instructions apply to all files in the repository.
+
+## Task Tracking
+- When you discover a repository issue that isn't necessary for completing your current task, add a concise entry to `docs/TASKS.md` so it can be addressed later.
+- Remove any item from `docs/TASKS.md` after implementing it.
