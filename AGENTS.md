@@ -24,10 +24,12 @@ incomplete-- to be written at a later date.
 2. Format and lint: `black .` and `ruff .`.
 3. Run tests: `pytest`.
 4. Ensure all checks pass before committing.
-5. Ensure your OpenAI API key is available as the `OPENAI_API_KEY` environment
-   variable. If the variable is missing, ask the user to provide the key. The
-   agent must never insert the key itself, and it cannot be stored in the
-   repository.
+5. Ensure your OpenAI API key is available. When a human user runs code in this
+   repository, the key should be set as the `OPENAI_API_KEY` environment
+   variable. When the agent runs autonomously, the key is provided as a secret
+   named `OPENAI_API_KEY`, not an environment variable. If the key is missing,
+   instruct the user to add it as a secret. The agent must never insert the key
+   itself, and it cannot be stored in the repository.
 
 ## Pull Request Guidelines
 - Use clear, descriptive titles.
