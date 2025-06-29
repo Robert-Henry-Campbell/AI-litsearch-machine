@@ -76,16 +76,16 @@ python extract/pdf_to_text.py path/to/paper.pdf
 ```
 Both commands expect a single PDF file path and should be run for every paper.
 
-3. Execute Agent 1 to extract metadata:
+3. Execute Agent 1 to extract metadata by pointing it to a text JSON file:
 
 ```bash
-python -m agent1.metadata_extractor
+python -m agent1.metadata_extractor data/text/paper.json
 ```
 
 If you prefer running the script directly, set `PYTHONPATH=$(pwd)` first:
 
 ```bash
-PYTHONPATH=$(pwd) python agent1/metadata_extractor.py
+PYTHONPATH=$(pwd) python agent1/metadata_extractor.py data/text/paper.json
 ```
 
 4. Aggregate metadata:
