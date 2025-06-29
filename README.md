@@ -69,6 +69,10 @@ in the repository:
 export OPENAI_API_KEY=<your-key>
 ```
 
+## Testing
+Run `pytest` to execute the test suite. Any test that requires the OpenAI API
+will use your configured key and is skipped automatically if the key is absent.
+
 ## Usage
 1. Place your academic PDFs in `data/pdfs/`.
 2. Run ingestion and text extraction **for each PDF**:
