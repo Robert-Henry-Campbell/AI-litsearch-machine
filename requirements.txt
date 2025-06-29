@@ -6,3 +6,4 @@ pydantic
 orjson
 reportlab
 
+openai
