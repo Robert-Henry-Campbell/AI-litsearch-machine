@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import List
+import time
+
+from utils.logger import get_logger
 
 import orjson
 
@@ -13,6 +16,8 @@ from agent2.openai_narrative import OpenAINarrative
 from agent2 import retrieval
 
 OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+
+logger = get_logger("pipeline")
 
 
 def ingest_pdfs(pdf_dir: str) -> List[Path]:
@@ -55,12 +60,19 @@ def generate_narrative(drug_name: str) -> Path:
     return out_file
 
 
+def timed_step(step_func, step_name: str) -> None:
+    start = time.time()
+    step_func()
+    duration = time.time() - start
+    logger.info("%s completed in %.2fs", step_name, duration)
+
+
 def run_pipeline(pdf_dir: str, drug_name: str) -> None:
     """Execute the full data processing pipeline."""
-    ingest_pdfs(pdf_dir)
-    extract_metadata_from_text()
-    aggregate.aggregate_metadata()
-    generate_narrative(drug_name)
+    timed_step(lambda: ingest_pdfs(pdf_dir), "Ingestion")
+    timed_step(extract_metadata_from_text, "Metadata Extraction")
+    timed_step(aggregate.aggregate_metadata, "Aggregation")
+    timed_step(lambda: generate_narrative(drug_name), "Narrative Generation")
 
 
 if __name__ == "__main__":

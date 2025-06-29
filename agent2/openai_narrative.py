@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 import time
 import orjson
+
+from utils.logger import get_logger
 
 # openai imported lazily for tests
 import openai
 
 PROMPT_PATH = Path(__file__).resolve().parents[1] / "prompts" / "agent2_system.txt"
+
+
+logger = get_logger(__name__)
 
 
 class OpenAINarrative:
@@ -34,15 +39,36 @@ class OpenAINarrative:
         ]
         delay = 1.0
         for attempt in range(max_retries + 1):
+            start_time = time.time()
             try:
                 response = openai.ChatCompletion.create(
                     model=self.model, messages=messages
                 )
-                content = response["choices"][0]["message"]["content"]
-                return content
-            except Exception:
+            except Exception as exc:  # pragma: no cover - network errors
+                duration = time.time() - start_time
+                logger.error(
+                    "Narrative generation failed on attempt %s after %.2fs: %s",
+                    attempt + 1,
+                    duration,
+                    exc,
+                )
                 if attempt >= max_retries:
                     raise
                 time.sleep(delay)
                 delay *= 2
+                continue
+
+            duration = time.time() - start_time
+            usage = response.get("usage")
+            logger.info("API Call Duration: %.2fs", duration)
+            if usage:
+                logger.info(
+                    "Tokens used: prompt=%s completion=%s total=%s",
+                    usage.get("prompt_tokens"),
+                    usage.get("completion_tokens"),
+                    usage.get("total_tokens"),
+                )
+            content = response["choices"][0]["message"]["content"]
+            logger.info("Narrative generation succeeded")
+            return content
         raise RuntimeError("Failed to obtain narrative from OpenAI")
