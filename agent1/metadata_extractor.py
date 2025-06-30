@@ -60,7 +60,8 @@ class MetadataExtractor:
     ) -> Optional[PaperMetadata]:
         """Extract metadata from ``text_or_path``.
 
-        ``drug_name`` is accepted for future use but currently ignored.
+        If ``drug_name`` is provided, ``metadata.targets`` is set to ``[drug_name]``
+        after validation.
         """
         text, src_path = self._load_text(text_or_path)
         for attempt in range(2):
@@ -68,6 +69,8 @@ class MetadataExtractor:
             try:
                 result = self.client.call(text)
                 metadata = PaperMetadata.model_validate(result)
+                if drug_name is not None:
+                    metadata.targets = [drug_name]
             except (ValidationError, Exception) as exc:
                 duration = time.time() - start
                 logger.error(
@@ -110,7 +113,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     extractor = MetadataExtractor()
-    result = extractor.extract(args.text)
+    result = extractor.extract(args.text, None)
     if result is None:
         print("Extraction failed")
     else:

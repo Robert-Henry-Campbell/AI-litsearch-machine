@@ -42,7 +42,7 @@ def test_retry_logic(monkeypatch, tmp_path):
     text_path = create_text_file(tmp_path)
     client = FakeClient([{"title": 1}, {"title": "T"}])
     extractor = MetadataExtractor(client=client)
-    result = extractor.extract(text_path)
+    result = extractor.extract(text_path, None)
     assert result is not None
     assert client.calls == 2
 

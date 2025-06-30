@@ -12,7 +12,7 @@ def process_pdf(pdf_path: Path) -> bool:
     pdf_to_text.pdf_to_text(pdf_path)
     text_path = pdf_to_text.DATA_DIR / f"{pdf_path.stem}.json"
     extractor = MetadataExtractor()
-    metadata = extractor.extract(text_path)
+    metadata = extractor.extract(text_path, None)
     if metadata is None:
         print(f"Failed to extract metadata from {pdf_path}")
         return False
