@@ -20,7 +20,9 @@ class FakeExtractor:
     def __init__(self) -> None:
         self.calls: list[Path] = []
 
-    def extract(self, text_path: Path) -> PaperMetadata | None:
+    def extract(
+        self, text_path: Path, drug_name: str | None = None
+    ) -> PaperMetadata | None:
         self.calls.append(text_path)
         return PaperMetadata(title="T", doi="10.1/test")
 

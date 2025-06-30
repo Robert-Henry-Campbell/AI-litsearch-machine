@@ -81,7 +81,7 @@ def test_full_pipeline(tmp_path, monkeypatch):
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", meta_dir)
     client = FakeClient(valid_metadata())
     extractor = MetadataExtractor(client=client)
-    meta = extractor.extract(text_path)
+    meta = extractor.extract(text_path, "Drug")
     assert meta is not None
     out_file = meta_dir / "10.1_test.json"
     assert out_file.exists()
