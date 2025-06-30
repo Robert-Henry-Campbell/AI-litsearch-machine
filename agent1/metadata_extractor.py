@@ -55,13 +55,17 @@ class MetadataExtractor:
         out_path.write_bytes(orjson.dumps(metadata.model_dump()))
         return out_path
 
-    def extract(self, text_or_path: Union[str, Path]) -> Optional[PaperMetadata]:
+    def extract(
+        self, text_or_path: Union[str, Path], drug_name: Optional[str] = None
+    ) -> Optional[PaperMetadata]:
         text, src_path = self._load_text(text_or_path)
         for attempt in range(2):
             start = time.time()
             try:
                 result = self.client.call(text)
                 metadata = PaperMetadata.model_validate(result)
+                if drug_name is not None:
+                    metadata.targets = [drug_name]
             except (ValidationError, Exception) as exc:
                 duration = time.time() - start
                 logger.error(
