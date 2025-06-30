@@ -1,5 +1,10 @@
+import sys
+from pathlib import Path
+
 import openai
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from utils.secrets import get_openai_api_key
 
 
