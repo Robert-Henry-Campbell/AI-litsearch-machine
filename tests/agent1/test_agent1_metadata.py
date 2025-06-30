@@ -70,7 +70,7 @@ def test_cli_end_to_end(monkeypatch, tmp_path):
     result = {"title": "T", "doi": "10.1/x"}
     fake_client = FakeClient([result])
     monkeypatch.setattr(
-        "agent1.metadata_extractor.OpenAIJSONCaller", lambda: fake_client
+        "agent1.metadata_extractor.OpenAIJSONCaller", lambda *a, **k: fake_client
     )
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
     monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")

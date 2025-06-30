@@ -10,8 +10,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run MR literature pipeline.")
     parser.add_argument("--pdf_dir", required=True, help="Directory containing PDFs")
     parser.add_argument("--drug", required=True, help="Name of the drug for review")
+    parser.add_argument("--model", help="OpenAI model name")
     args = parser.parse_args(argv)
-    pipeline.run_pipeline(args.pdf_dir, args.drug)
+    pipeline.run_pipeline(args.pdf_dir, args.drug, args.model)
     return 0
 
 

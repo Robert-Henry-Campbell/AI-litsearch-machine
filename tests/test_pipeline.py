@@ -64,7 +64,7 @@ def test_run_pipeline(monkeypatch, tmp_path):
     monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "out")
 
     fake = FakeNarrative()
-    monkeypatch.setattr("pipeline.OpenAINarrative", lambda: fake)
+    monkeypatch.setattr("pipeline.OpenAINarrative", lambda *a, **k: fake)
 
     pipeline.run_pipeline(str(pdf_dir), "test")
 
