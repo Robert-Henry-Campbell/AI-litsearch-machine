@@ -39,12 +39,12 @@ def ingest_pdfs(pdf_dir: str) -> List[Path]:
     return paths
 
 
-def extract_metadata_from_text() -> List[Path]:
-    """Run Agent 1 on all text files in ``TEXT_DIR``."""
+def extract_metadata_from_text(drug_name: str) -> List[Path]:
+    """Run Agent 1 on all text files in ``TEXT_DIR`` using ``drug_name``."""
     extractor = MetadataExtractor()
     results = []
     for text_path in sorted(TEXT_DIR.glob("*.json")):
-        meta = extractor.extract(text_path)
+        meta = extractor.extract(text_path, drug_name)
         if meta is not None:
             results.append(text_path)
     return results
@@ -83,7 +83,9 @@ def run_pipeline(pdf_dir: str, drug_name: str) -> None:
     """Execute the full data processing pipeline."""
     metrics: Dict[str, StepMetrics] = {}
     timed_step(lambda: ingest_pdfs(pdf_dir), "Ingestion", metrics)
-    timed_step(extract_metadata_from_text, "Metadata Extraction", metrics)
+    timed_step(
+        lambda: extract_metadata_from_text(drug_name), "Metadata Extraction", metrics
+    )
     timed_step(aggregate.aggregate_metadata, "Aggregation", metrics)
     timed_step(lambda: generate_narrative(drug_name), "Narrative Generation", metrics)
     logger.info("-- Performance Summary --")
