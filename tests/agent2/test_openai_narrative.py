@@ -1,6 +1,7 @@
 import sys
 import types
 from pathlib import Path
+import importlib
 import pytest
 
 
@@ -46,15 +47,27 @@ fake_chat = FakeChatCompletion()
 fake_client = types.SimpleNamespace(chat=types.SimpleNamespace(completions=fake_chat))
 fake_openai.ChatCompletion = fake_chat
 fake_openai.OpenAI = lambda api_key=None: fake_client
-sys.modules["openai"] = fake_openai
+
+real_openai = sys.modules.get("openai")
+
+
+@pytest.fixture(autouse=True)
+def fake_openai_module(monkeypatch):
+    monkeypatch.setitem(sys.modules, "openai", fake_openai)
+    import agent2.openai_narrative as on
+
+    importlib.reload(on)
+    yield
+    if real_openai is not None:
+        monkeypatch.setitem(sys.modules, "openai", real_openai)
+    else:
+        monkeypatch.delitem(sys.modules, "openai", raising=False)
+    importlib.reload(on)
 
 
 @pytest.fixture(autouse=True)
 def fake_openai_key(monkeypatch):
     monkeypatch.setattr("agent2.openai_narrative.get_openai_api_key", lambda: "key")
-
-
-from agent2.openai_narrative import OpenAINarrative  # noqa: E402
 
 
 def setup_prompt(tmp_path: Path) -> Path:
@@ -70,6 +83,8 @@ def test_success(monkeypatch, tmp_path):
     monkeypatch.setattr("agent2.openai_narrative.PROMPT_PATH", path)
     fake_chat.calls.clear()
     fake_chat.responses = [{"choices": [{"message": {"content": "done"}}]}]
+    from agent2.openai_narrative import OpenAINarrative
+
     gen = OpenAINarrative(model="test")
     result = gen.generate([{"title": "T"}], ["s1"])
     assert result == "done"
@@ -85,6 +100,8 @@ def test_retry(monkeypatch, tmp_path):
         {"choices": [{"message": {"content": "ok"}}]},
     ]
     monkeypatch.setattr("time.sleep", lambda x: None)
+    from agent2.openai_narrative import OpenAINarrative
+
     gen = OpenAINarrative(model="test")
     result = gen.generate([{"title": "T"}], ["s1"])
     assert result == "ok"
@@ -96,6 +113,8 @@ def test_auth_error(monkeypatch, tmp_path):
     monkeypatch.setattr("agent2.openai_narrative.PROMPT_PATH", path)
     fake_chat.calls.clear()
     fake_chat.responses = [fake_openai.error.AuthenticationError("bad key")]
+    from agent2.openai_narrative import OpenAINarrative
+
     gen = OpenAINarrative(model="test")
     with pytest.raises(fake_openai.error.AuthenticationError):
         gen.generate([{"title": "T"}], ["s1"])
@@ -111,6 +130,8 @@ def test_rate_limit(monkeypatch, tmp_path):
         {"choices": [{"message": {"content": "ok"}}]},
     ]
     monkeypatch.setattr("time.sleep", lambda x: None)
+    from agent2.openai_narrative import OpenAINarrative
+
     gen = OpenAINarrative(model="test")
     result = gen.generate([{"title": "T"}], ["s1"])
     assert result == "ok"

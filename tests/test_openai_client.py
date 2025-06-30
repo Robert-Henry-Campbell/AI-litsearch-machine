@@ -1,6 +1,7 @@
 import sys
 import types
 import pytest
+import importlib
 
 import orjson
 
@@ -46,15 +47,27 @@ fake_chat = FakeChatCompletion()
 fake_client = types.SimpleNamespace(chat=types.SimpleNamespace(completions=fake_chat))
 fake_openai.ChatCompletion = fake_chat
 fake_openai.OpenAI = lambda api_key=None: fake_client
-sys.modules["openai"] = fake_openai
+
+real_openai = sys.modules.get("openai")
+
+
+@pytest.fixture(autouse=True)
+def fake_openai_module(monkeypatch):
+    monkeypatch.setitem(sys.modules, "openai", fake_openai)
+    import agent1.openai_client as oc
+
+    importlib.reload(oc)
+    yield
+    if real_openai is not None:
+        monkeypatch.setitem(sys.modules, "openai", real_openai)
+    else:
+        monkeypatch.delitem(sys.modules, "openai", raising=False)
+    importlib.reload(oc)
 
 
 @pytest.fixture(autouse=True)
 def fake_openai_key(monkeypatch):
     monkeypatch.setattr("agent1.openai_client.get_openai_api_key", lambda: "key")
-
-
-from agent1.openai_client import OpenAIJSONCaller  # noqa: E402
 
 
 def setup_prompt(tmp_path):
@@ -70,6 +83,8 @@ def test_success(monkeypatch, tmp_path):
     monkeypatch.setattr("agent1.openai_client.PROMPT_PATH", path)
     fake_chat.calls.clear()
     fake_chat.responses = [{"choices": [{"message": {"content": '{"ok": 1}'}}]}]
+    from agent1.openai_client import OpenAIJSONCaller
+
     client = OpenAIJSONCaller(model="test")
     result = client.call("hello")
     assert result == {"ok": 1}
@@ -85,6 +100,8 @@ def test_retry(monkeypatch, tmp_path):
         {"choices": [{"message": {"content": '{"ok": 2}'}}]},
     ]
     monkeypatch.setattr("time.sleep", lambda x: None)
+    from agent1.openai_client import OpenAIJSONCaller
+
     client = OpenAIJSONCaller(model="test")
     result = client.call("hello")
     assert result == {"ok": 2}
@@ -101,6 +118,8 @@ def test_fail(monkeypatch, tmp_path):
         {"choices": [{"message": {"content": "nope"}}]},
     ]
     monkeypatch.setattr("time.sleep", lambda x: None)
+    from agent1.openai_client import OpenAIJSONCaller
+
     client = OpenAIJSONCaller(model="test")
     with pytest.raises(orjson.JSONDecodeError):
         client.call("hello")
@@ -112,6 +131,8 @@ def test_auth_error(monkeypatch, tmp_path):
     monkeypatch.setattr("agent1.openai_client.PROMPT_PATH", path)
     fake_chat.calls.clear()
     fake_chat.responses = [fake_openai.error.AuthenticationError("bad key")]
+    from agent1.openai_client import OpenAIJSONCaller
+
     client = OpenAIJSONCaller(model="test")
     with pytest.raises(fake_openai.error.AuthenticationError):
         client.call("hello")
@@ -127,6 +148,8 @@ def test_rate_limit(monkeypatch, tmp_path):
         {"choices": [{"message": {"content": '{"ok": 3}'}}]},
     ]
     monkeypatch.setattr("time.sleep", lambda x: None)
+    from agent1.openai_client import OpenAIJSONCaller
+
     client = OpenAIJSONCaller(model="test")
     result = client.call("hello")
     assert result == {"ok": 3}
