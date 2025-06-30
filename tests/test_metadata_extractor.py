@@ -52,7 +52,7 @@ def test_extract_success(tmp_path, monkeypatch):
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
     client = FakeClient([valid_data()])
     extractor = MetadataExtractor(client=client)
-    result = extractor.extract(text_path, None)
+    result = extractor.extract(text_path, "Drug")
     assert result is not None
     out_file = tmp_path / "meta" / "10.1_abc.json"
     assert out_file.exists()
@@ -66,7 +66,7 @@ def test_extract_retry(tmp_path, monkeypatch):
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
     client = FakeClient([{"title": 1}, valid_data()])
     extractor = MetadataExtractor(client=client)
-    result = extractor.extract(text_path, None)
+    result = extractor.extract(text_path, "Drug")
     assert result is not None
     assert client.calls == 2
 
@@ -78,7 +78,7 @@ def test_extract_fail(tmp_path, monkeypatch):
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
     client = FakeClient([{"title": 1}, {"title": 2}])
     extractor = MetadataExtractor(client=client)
-    result = extractor.extract(text_path, None)
+    result = extractor.extract(text_path, "Drug")
     assert result is None
     assert client.calls == 2
     assert not list((tmp_path / "meta").glob("*.json"))

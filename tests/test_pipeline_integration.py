@@ -17,14 +17,19 @@ class FakeNarrative:
 
 
 class FakeExtractor:
-    def __init__(self) -> None:
+    def __init__(self, meta_dir: Path) -> None:
         self.calls: list[Path] = []
+        self.meta_dir = meta_dir
 
-    def extract(
-        self, text_path: Path, _drug: str | None = None
-    ) -> PaperMetadata | None:
+    def extract(self, text_path: Path, drug: str | None = None) -> PaperMetadata | None:
         self.calls.append(text_path)
-        return PaperMetadata(title="T", doi="10.1/test")
+        meta = PaperMetadata(
+            title="T", doi="10.1/test", targets=[drug] if drug else None
+        )
+        self.meta_dir.mkdir(parents=True, exist_ok=True)
+        out_path = self.meta_dir / f"{text_path.stem}.json"
+        out_path.write_bytes(orjson.dumps(meta.model_dump()))
+        return meta
 
 
 def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
@@ -39,7 +44,7 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr("agent2.retrieval.TEXT_DIR", tmp_path / "text")
     monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "outputs")
 
-    extractor = FakeExtractor()
+    extractor = FakeExtractor(tmp_path / "meta")
     monkeypatch.setattr("pipeline.MetadataExtractor", lambda: extractor)
     narrative = FakeNarrative()
     monkeypatch.setattr("pipeline.OpenAINarrative", lambda: narrative)
@@ -53,6 +58,7 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
     assert isinstance(data, list)
     for record in data:
         PaperMetadata.model_validate(record)
+        assert record.get("targets") == ["TestDrug"]
 
     out_file = tmp_path / "outputs" / "review_TestDrug.md"
     assert out_file.exists()
