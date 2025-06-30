@@ -55,7 +55,7 @@ def test_run_pipeline(monkeypatch, tmp_path):
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
     monkeypatch.setattr(
         "agent1.metadata_extractor.MetadataExtractor.extract",
-        lambda self, _path: PaperMetadata(**valid_metadata()),
+        lambda self, _path, _drug=None: PaperMetadata(**valid_metadata()),
     )
     monkeypatch.setattr("aggregate.META_DIR", tmp_path / "meta")
     monkeypatch.setattr("aggregate.MASTER_PATH", tmp_path / "master.json")

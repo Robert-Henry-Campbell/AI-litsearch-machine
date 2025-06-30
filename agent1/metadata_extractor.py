@@ -55,7 +55,13 @@ class MetadataExtractor:
         out_path.write_bytes(orjson.dumps(metadata.model_dump()))
         return out_path
 
-    def extract(self, text_or_path: Union[str, Path]) -> Optional[PaperMetadata]:
+    def extract(
+        self, text_or_path: Union[str, Path], drug_name: str | None = None
+    ) -> Optional[PaperMetadata]:
+        """Extract metadata from ``text_or_path``.
+
+        ``drug_name`` is accepted for future use but currently ignored.
+        """
         text, src_path = self._load_text(text_or_path)
         for attempt in range(2):
             start = time.time()
