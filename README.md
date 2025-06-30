@@ -44,7 +44,7 @@ Below is a brief description of the main scripts and where their outputs are wri
 ## Features Under Development
 None at this time.
 
-## Installation
+## Installation (VENV-- Not Reccomended)
 Clone the repository and create a virtual environment:
 
 ```bash
@@ -68,6 +68,31 @@ in the repository:
 ```bash
 export OPENAI_API_KEY=<your-key>
 ```
+
+## Installation Docker (recommended)
+
+1. Build the Codex-universal base once:
+
+   MSYS_NO_PATHCONV=1 docker build -t codex-universal:fixed ./codex-universal
+
+2. Build the project image:
+
+   MSYS_NO_PATHCONV=1 docker build -t ai-litsearch-machine .
+
+3. Create an `.env` file (not committed) with your key:
+
+   OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+4. Run the full pipeline (PDFs must already be in `data/pdfs/`):
+
+   MSYS_NO_PATHCONV=1 docker run --rm -it \
+     --env-file .env \
+     -v "$(pwd)/data:/data" \
+     -v "$(pwd)/outputs:/app/outputs" \
+     ai-litsearch-machine \
+     run_pipeline.py --pdf_dir /data/pdfs --drug <drug-name>
+
+Results appear in `./outputs/` on the host.
 
 ## Testing
 Run `pytest` to execute the test suite. Any test that requires the OpenAI API
