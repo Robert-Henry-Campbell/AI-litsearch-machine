@@ -1,1 +1,6 @@
+#secrets
+.env
 secrets.txt
+
+/data/meta/*
+/data/text/*
