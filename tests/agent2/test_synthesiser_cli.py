@@ -10,6 +10,13 @@ import orjson
 fake_openai = types.ModuleType("openai")
 sys.modules["openai"] = fake_openai
 
+
+def teardown_module(module):
+    """Restore the real OpenAI module after tests."""
+    for mod in ("agent2.synthesiser", "openai"):
+        sys.modules.pop(mod, None)
+
+
 import agent2.synthesiser as synthesiser  # noqa: E402
 
 

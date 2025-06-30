@@ -65,6 +65,12 @@ def fake_openai_module(monkeypatch):
     importlib.reload(oc)
 
 
+def teardown_module(module):
+    """Restore the real OpenAI module after tests."""
+    for mod in ("agent1.openai_client", "openai"):
+        sys.modules.pop(mod, None)
+
+
 @pytest.fixture(autouse=True)
 def fake_openai_key(monkeypatch):
     monkeypatch.setattr("agent1.openai_client.get_openai_api_key", lambda: "key")
