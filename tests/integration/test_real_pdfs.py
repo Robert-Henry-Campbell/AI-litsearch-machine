@@ -35,7 +35,7 @@ def test_full_extraction_real_file(
     from agent1.metadata_extractor import MetadataExtractor
 
     extractor = MetadataExtractor()
-    meta = extractor.extract(tmp_path / "text" / f"{pdf_path.stem}.json")
+    meta = extractor.extract(tmp_path / "text" / f"{pdf_path.stem}.json", None)
     assert meta is not None
     PaperMetadata.model_validate(meta.model_dump())
 
