@@ -39,9 +39,9 @@ def ingest_pdfs(pdf_dir: str) -> List[Path]:
     return paths
 
 
-def extract_metadata_from_text(drug_name: str) -> List[Path]:
+def extract_metadata_from_text(drug_name: str, model: str | None = None) -> List[Path]:
     """Run Agent 1 on all text files in ``TEXT_DIR`` using ``drug_name``."""
-    extractor = MetadataExtractor()
+    extractor = MetadataExtractor(model=model) if model else MetadataExtractor()
     results = []
     for text_path in sorted(TEXT_DIR.glob("*.json")):
         meta = extractor.extract(text_path, drug_name)
@@ -50,7 +50,7 @@ def extract_metadata_from_text(drug_name: str) -> List[Path]:
     return results
 
 
-def generate_narrative(drug_name: str) -> Path:
+def generate_narrative(drug_name: str, model: str | None = None) -> Path:
     """Generate a narrative review from ``master.json`` using ``drug_name``."""
     master_path = aggregate.MASTER_PATH
     if not master_path.exists():
@@ -61,7 +61,8 @@ def generate_narrative(drug_name: str) -> Path:
         doi = record.get("doi")
         if doi:
             snippets.extend(retrieval.get_snippets(doi, drug_name))
-    narrative = OpenAINarrative().generate(metadata, snippets)
+    generator = OpenAINarrative(model=model) if model else OpenAINarrative()
+    narrative = generator.generate(metadata, snippets)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     out_file = OUTPUT_DIR / f"review_{drug_name.replace(' ', '_')}.md"
     out_file.write_text(narrative)
@@ -79,15 +80,21 @@ def timed_step(step_func, step_name: str, metrics: Dict[str, StepMetrics]) -> No
     metrics[step_name] = StepMetrics(duration=duration, memory_kb=mem_delta)
 
 
-def run_pipeline(pdf_dir: str, drug_name: str) -> None:
+def run_pipeline(pdf_dir: str, drug_name: str, model: str | None = None) -> None:
     """Execute the full data processing pipeline."""
     metrics: Dict[str, StepMetrics] = {}
     timed_step(lambda: ingest_pdfs(pdf_dir), "Ingestion", metrics)
     timed_step(
-        lambda: extract_metadata_from_text(drug_name), "Metadata Extraction", metrics
+        lambda: extract_metadata_from_text(drug_name, model),
+        "Metadata Extraction",
+        metrics,
     )
     timed_step(aggregate.aggregate_metadata, "Aggregation", metrics)
-    timed_step(lambda: generate_narrative(drug_name), "Narrative Generation", metrics)
+    timed_step(
+        lambda: generate_narrative(drug_name, model),
+        "Narrative Generation",
+        metrics,
+    )
     logger.info("-- Performance Summary --")
     for name, data in sorted(
         metrics.items(), key=lambda x: x[1].duration, reverse=True
@@ -101,6 +108,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the full pipeline")
     parser.add_argument("--pdf-dir", required=True, help="Directory with PDFs")
     parser.add_argument("--drug", required=True, help="Drug name for snippets")
+    parser.add_argument(
+        "--model",
+        help="OpenAI model name",
+    )
     args = parser.parse_args()
 
-    run_pipeline(args.pdf_dir, args.drug)
+    run_pipeline(args.pdf_dir, args.drug, args.model)
