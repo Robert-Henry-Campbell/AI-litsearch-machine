@@ -72,6 +72,8 @@ export OPENAI_API_KEY=<your-key>
 ## Testing
 Run `pytest` to execute the test suite. Any test that requires the OpenAI API
 will use your configured key and is skipped automatically if the key is absent.
+Live integration tests that exercise the entire pipeline are located under
+`tests/integration/` and in `tests/agent2/test_openai_narrative_live.py`.
 
 ## Usage
 1. Place your academic PDFs in `data/pdfs/`.
