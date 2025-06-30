@@ -22,8 +22,13 @@ logger = get_logger(__name__)
 class MetadataExtractor:
     """Extract metadata from text using OpenAI and validate against schema."""
 
-    def __init__(self, client: Optional[OpenAIJSONCaller] = None) -> None:
-        self.client = client or OpenAIJSONCaller()
+    def __init__(
+        self,
+        client: Optional[OpenAIJSONCaller] = None,
+        *,
+        model: str = "gpt-4-0125-preview",
+    ) -> None:
+        self.client = client or OpenAIJSONCaller(model=model)
         META_DIR.mkdir(parents=True, exist_ok=True)
 
     @staticmethod

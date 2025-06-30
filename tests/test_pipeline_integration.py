@@ -45,11 +45,13 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "outputs")
 
     extractor = FakeExtractor(tmp_path / "meta")
-    monkeypatch.setattr("pipeline.MetadataExtractor", lambda: extractor)
+    monkeypatch.setattr("pipeline.MetadataExtractor", lambda *a, **k: extractor)
     narrative = FakeNarrative()
-    monkeypatch.setattr("pipeline.OpenAINarrative", lambda: narrative)
+    monkeypatch.setattr("pipeline.OpenAINarrative", lambda *a, **k: narrative)
 
-    code = run_pipeline.main(["--pdf_dir", str(pdf_dir), "--drug", "TestDrug"])
+    code = run_pipeline.main(
+        ["--pdf_dir", str(pdf_dir), "--drug", "TestDrug", "--model", "m"]
+    )
     assert code == 0
 
     master_path = tmp_path / "master.json"
