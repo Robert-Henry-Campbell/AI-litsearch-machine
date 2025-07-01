@@ -48,12 +48,8 @@ Below is a brief description of the main scripts and where their outputs are wri
   snippets into a narrative review string.
 - `agent2/synthesiser.py` is a command-line wrapper that filters `master.json`
   by drug, gathers snippets, and writes a Markdown review to the `outputs/`
-  directory.
 - `pipeline.py` and `run_pipeline.py` orchestrate the entire workflow—ingestion,
-  metadata extraction, aggregation and narrative generation—when run from the
-  command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model`
-  options to override the default OpenAI models. (Agent 1 and Agent 2 default to `gpt-4o-2024-05-13`, embeddings default to `text-embedding-3-small`). The `--retrieval` option
-  selects either the `faiss` index or plain text search for snippet retrieval.
+  metadata extraction, aggregation and narrative generation when run from the command line. Both scripts accept `--base_dir` so you can keep PDFs, intermediate files and outputs in a dedicated directory per drug. Use the `--agent1-model`, `--agent2-model` and `--embed-model` options to override the default OpenAI models. The `--retrieval` option selects either the `faiss` index or plain text search for snippet retrieval.
 - `run_smoke_test.py` ingests a single PDF and prints the first few hundred
   characters from each page as a quick sanity check.
 - `utils/data_wipe.py` deletes generated data and logs. Pass `--with-pdfs` to
@@ -131,7 +127,7 @@ Both commands expect a single PDF file path and should be run for every paper.
 3. Build the embedding index from the extracted text using OpenAI embeddings:
 
 ```bash
-python build_embeddings.py --base_dir data --model text-embedding-3-small
+python build_embeddings.py --base_dir data/<drug-name> --model text-embedding-3-small
 ```
 
 This step calls the OpenAI API to generate embeddings. The resulting
@@ -187,11 +183,14 @@ python agent2/synthesiser.py --drug <drug-name>
 
 8. Run the entire pipeline in one step using the CLI script:
 
+   Store PDFs for each drug under `data/pdfs/<drug-name>` and use a matching
+   directory for `--base_dir` so that outputs are kept separate.
+
 ```bash
 python run_pipeline.py \
-    --pdf_dir data/pdfs \
+    --pdf_dir data/pdfs/<drug-name> \
     --drug <drug-name> \
-    --base_dir data \
+    --base_dir data/<drug-name> \
     --agent1-model <agent1> \
     --agent2-model <agent2> \
     --embed-model <embed> \
