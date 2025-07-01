@@ -5,9 +5,10 @@ pipeline on the sample PDFs located in `tests/fixtures/sample_pdfs`.
 
 ## Metrics Collection
 
-`pipeline.py` now records the duration and memory delta for each major step using
-the standard `resource` module. After all steps complete, a summary is logged
-with steps sorted by runtime.
+`pipeline.py` records the duration and memory delta for each major step. It
+uses the standard `resource` module on Unix-like systems and falls back to
+`psutil` on Windows. After all steps complete, a summary is logged with steps
+sorted by runtime.
 
 ## Sample Run
 

@@ -48,8 +48,7 @@ Below is a brief description of the main scripts and where their outputs are wri
   directory.
 - `pipeline.py` and `run_pipeline.py` orchestrate the entire workflow—ingestion,
   metadata extraction, aggregation and narrative generation—when run from the
-  command line. Both accept an optional `--model` argument to override the
-  default OpenAI model used for metadata extraction and narrative generation.
+  command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model` options to override the default OpenAI models for metadata extraction, narrative generation and snippet embeddings respectively.
 - `run_smoke_test.py` ingests a single PDF and prints the first few hundred
   characters from each page as a quick sanity check.
 - `utils/data_wipe.py` deletes generated data and logs. Pass `--with-pdfs` to
@@ -191,8 +190,12 @@ python agent2/synthesiser.py --drug <drug-name>
 8. Run the entire pipeline in one step using the CLI script:
 
 ```bash
-python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name> --model <model-name>
-
+python run_pipeline.py \
+    --pdf_dir data/pdfs \
+    --drug <drug-name> \
+    --agent1-model <agent1> \
+    --agent2-model <agent2> \
+    --embed-model <embed>
 ```
 
 ## Output
@@ -220,7 +223,8 @@ Most modules emit standardized logs using Python's ``logging`` module. The
 pipeline and OpenAI helpers record timestamps, log levels and token usage.
 These logs include API timing information to help estimate costs and detect
 rate-limit issues. The pipeline also reports the duration and memory delta of
-each major step so you can identify slow stages. The ingestion and PDF
+each major step so you can identify slow stages. On Unix this uses the
+`resource` module, while Windows falls back to `psutil`. The ingestion and PDF
 extraction scripts simply produce output files and do not currently log.
 
 ## Contributing

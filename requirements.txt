@@ -10,3 +10,4 @@ openai==1.93.0
 faiss-cpu==1.7.4
 scikit-learn==1.7.0
 numpy<2
+psutil==5.9.8
