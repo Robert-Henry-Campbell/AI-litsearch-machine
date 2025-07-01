@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 
 import orjson
 
@@ -114,3 +115,44 @@ def test_build_index_when_missing(tmp_path: Path, monkeypatch) -> None:
 
     assert index_path.exists()
     assert result
+
+
+def test_embedding_snippets_test_papers(tmp_path: Path, monkeypatch) -> None:
+    base_dir = tmp_path / "test_papers"
+    pdf_dir = base_dir / "pdfs"
+    text_dir = base_dir / "text"
+    meta_dir = base_dir / "meta"
+    pdf_dir.mkdir(parents=True)
+    text_dir.mkdir()
+    meta_dir.mkdir()
+
+    for src in Path("data/test_papers/pdfs").glob("*.pdf"):
+        shutil.copy(src, pdf_dir / src.name)
+
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", text_dir)
+
+    from extract.pdf_to_text import pdf_to_text
+    from agent2.openai_index import build_openai_index
+
+    dois: list[str] = []
+    for pdf in sorted(pdf_dir.glob("*.pdf")):
+        pdf_to_text(pdf)
+        original = text_dir / f"{pdf.stem}.json"
+        doi = f"10.1/{pdf.stem}"
+        dois.append(doi)
+        renamed = text_dir / f"{doi.replace('/', '_')}.json"
+        original.rename(renamed)
+
+    index_path = base_dir / "index.faiss"
+    monkeypatch.setattr(
+        "agent2.openai_index.embed_chunks",
+        lambda chunks, model="m": [[0.1] * 2 for _ in chunks],
+    )
+    build_openai_index(sorted(text_dir.glob("*.json")), index_path, model="m")
+
+    monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
+    monkeypatch.setattr(retrieval, "INDEX_PATH", index_path)
+
+    result = retrieval.get_snippets(dois[0], "Sample", k=1, method="faiss")
+    assert result
+    assert "Sample" in result[0]
