@@ -1,6 +1,7 @@
 import pytest
 from agent1.openai_client import OpenAIJSONCaller
 from utils.secrets import get_openai_api_key
+from tests.openai_test_utils import handle_openai_exception
 from schemas.metadata import PaperMetadata
 
 
@@ -18,7 +19,11 @@ def test_openai_json_caller_live():
         "Published: 2024-01-01\n"
         "Data Source: INTERVAL"
     )
-    result = caller.call(snippet)
+    try:
+        result = caller.call(snippet)
+    except Exception as exc:  # pragma: no cover - live network error handling
+        handle_openai_exception(exc)
+        return
     PaperMetadata.model_validate(result)
     assert set(result) >= {
         "title",
