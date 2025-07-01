@@ -9,6 +9,8 @@ This project automates the extraction and synthesis of structured information fr
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
 - **Text Retrieval Helper**: Fetches keyword-based snippets from stored PDF text files for downstream RAG tasks.
 - **Text Embeddings**: Splits extracted text into chunks and generates OpenAI embeddings for semantic retrieval.
+- **Embedding Indexing**: Builds a FAISS vector store from extracted text for semantic snippet retrieval.
+- **Embedding-based Retrieval**: Searches the FAISS index for semantically similar text chunks.
 - **Narrative Review Generation (Agent 2)**: Generates peer-review style summaries using `agent2/openai_narrative.py`.
 
 ## Script Overview
