@@ -155,18 +155,15 @@ def run_pipeline(
     """Execute the full data processing pipeline."""
     dirs = make_dirs(base_dir)
     global TEXT_DIR, OUTPUT_DIR
-    if TEXT_DIR == DEFAULT_TEXT_DIR:
+    # Adjust helper module paths if they do not already point inside ``base_dir``.
+    if not TEXT_DIR.resolve().is_relative_to(dirs.base):
         TEXT_DIR = dirs.text
-    if OUTPUT_DIR == DEFAULT_OUTPUT_DIR:
+    if not OUTPUT_DIR.resolve().is_relative_to(dirs.base):
         OUTPUT_DIR = dirs.outputs
-    if meta_mod.META_DIR == DEFAULT_META_DIR:
+    if not meta_mod.META_DIR.resolve().is_relative_to(dirs.base):
         meta_mod.META_DIR = dirs.meta
-    if aggregate.META_DIR == DEFAULT_META_DIR:
-        aggregate.META_DIR = dirs.meta
-    if aggregate.MASTER_PATH == DEFAULT_MASTER_PATH:
-        aggregate.MASTER_PATH = dirs.master
-    if aggregate.HISTORY_DIR == DEFAULT_HISTORY_DIR:
-        aggregate.HISTORY_DIR = dirs.history
+    if not aggregate.META_DIR.resolve().is_relative_to(dirs.base):
+        aggregate.set_base_dir(dirs.base)
     retrieval.TEXT_DIR = dirs.text
     retrieval.INDEX_PATH = dirs.index
     metrics: Dict[str, StepMetrics] = {}
