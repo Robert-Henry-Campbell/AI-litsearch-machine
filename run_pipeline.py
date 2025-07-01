@@ -13,6 +13,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--agent1-model", help="Model for metadata extraction")
     parser.add_argument("--agent2-model", help="Model for narrative generation")
     parser.add_argument("--embed-model", help="Model for text embeddings")
+    parser.add_argument(
+        "--retrieval",
+        choices=["faiss", "text"],
+        default="faiss",
+        help="Snippet retrieval backend (default: faiss)",
+    )
     args = parser.parse_args(argv)
     pipeline.run_pipeline(
         args.pdf_dir,
@@ -20,6 +26,7 @@ def main(argv: list[str] | None = None) -> int:
         agent1_model=args.agent1_model,
         agent2_model=args.agent2_model,
         embed_model=args.embed_model,
+        retrieval_method=args.retrieval,
     )
     return 0
 

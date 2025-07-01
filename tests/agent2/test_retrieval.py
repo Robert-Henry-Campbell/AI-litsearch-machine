@@ -25,7 +25,7 @@ def test_successful_snippet_retrieval(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
     monkeypatch.setattr(retrieval, "INDEX_PATH", tmp_path / "missing.faiss")
 
-    result = retrieval.get_snippets("10.1/abc", "mendelian")
+    result = retrieval.get_snippets("10.1/abc", "mendelian", method="text")
     assert result
     assert any("Page 1" in s for s in result)
 
@@ -37,7 +37,7 @@ def test_no_matches(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
     monkeypatch.setattr(retrieval, "INDEX_PATH", tmp_path / "missing.faiss")
 
-    result = retrieval.get_snippets("10.2/xyz", "unrelated")
+    result = retrieval.get_snippets("10.2/xyz", "unrelated", method="text")
     assert result == []
 
 
@@ -56,6 +56,6 @@ def test_embedding_snippets(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
     monkeypatch.setattr(retrieval, "INDEX_PATH", index_path)
 
-    result = retrieval.get_snippets("10.3/emb", "mendelian", k=1)
+    result = retrieval.get_snippets("10.3/emb", "mendelian", k=1, method="faiss")
     assert result
     assert "mendelian" in result[0].lower()
