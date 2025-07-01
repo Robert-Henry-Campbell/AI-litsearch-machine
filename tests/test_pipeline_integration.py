@@ -50,7 +50,18 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setattr("pipeline.OpenAINarrative", lambda *a, **k: narrative)
 
     code = run_pipeline.main(
-        ["--pdf_dir", str(pdf_dir), "--drug", "TestDrug", "--model", "m"]
+        [
+            "--pdf_dir",
+            str(pdf_dir),
+            "--drug",
+            "TestDrug",
+            "--agent1-model",
+            "a1",
+            "--agent2-model",
+            "a2",
+            "--embed-model",
+            "e",
+        ]
     )
     assert code == 0
 

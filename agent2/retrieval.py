@@ -38,8 +38,18 @@ def _keyword_snippets(doi: str, keyword: str, *, window: int = 40) -> List[str]:
     return results
 
 
-def get_snippets(doi: str, drug_name: str, k: int = 5) -> List[str]:
-    """Return up to ``k`` snippets mentioning ``drug_name`` from ``doi``."""
+def get_snippets(
+    doi: str,
+    drug_name: str,
+    *,
+    k: int = 5,
+    embed_model: str | None = None,
+) -> List[str]:
+    """Return up to ``k`` snippets mentioning ``drug_name`` from ``doi``.
+
+    ``embed_model`` is reserved for future use when snippet retrieval leverages
+    OpenAI embeddings.
+    """
     results: List[str] = []
 
     if INDEX_PATH.exists():
