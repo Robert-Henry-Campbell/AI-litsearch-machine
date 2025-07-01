@@ -6,7 +6,10 @@ from typing import List, Literal
 
 import orjson
 
+from utils.logger import get_logger
 from .openai_index import query_index, build_openai_index
+
+logger = get_logger(__name__)
 
 BASE_DIR = Path("data")
 TEXT_DIR = BASE_DIR / "text"
@@ -27,6 +30,7 @@ def _safe_name(doi: str) -> str:
 def load_pages(doi: str) -> List[dict]:
     path = TEXT_DIR / f"{_safe_name(doi)}.json"
     if not path.exists():
+        logger.warning("Text file missing for DOI %s", doi)
         return []
     data = orjson.loads(path.read_bytes())
     return data.get("pages", [])
@@ -43,6 +47,8 @@ def _keyword_snippets(doi: str, keyword: str, *, window: int = 40) -> List[str]:
             end = min(match.end() + window, len(text))
             snippet = text[start:end].strip()
             results.append(f"Page {page.get('page')}: {snippet}")
+    if not results:
+        logger.info("No keyword matches for %s in %s", keyword, doi)
     return results
 
 
@@ -68,10 +74,12 @@ def get_snippets(
         if not INDEX_PATH.exists():
             paths = sorted(TEXT_DIR.glob("*.json"))
             if paths:
+                logger.info("Building embedding index with %s files", len(paths))
                 build_openai_index(
                     paths, INDEX_PATH, model=embed_model or "text-embedding-3-small"
                 )
         if not INDEX_PATH.exists():
+            logger.error("Index %s not found", INDEX_PATH)
             raise FileNotFoundError(INDEX_PATH)
         try:
             emb = query_index(
@@ -81,8 +89,12 @@ def get_snippets(
                 index_path=INDEX_PATH,
                 model=embed_model or "text-embedding-3-small",
             )
-            return [r.get("text", "").strip() for r in emb if r.get("text")][:k]
-        except Exception:
+            snippets = [r.get("text", "").strip() for r in emb if r.get("text")][:k]
+            if not snippets:
+                logger.info("No embedding matches for %s", doi)
+            return snippets
+        except Exception as exc:
+            logger.error("Embedding retrieval failed for %s: %s", doi, exc)
             return []
 
     # method == "text"
