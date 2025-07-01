@@ -61,6 +61,8 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
             "a2",
             "--embed-model",
             "e",
+            "--retrieval",
+            "text",
         ]
     )
     assert code == 0

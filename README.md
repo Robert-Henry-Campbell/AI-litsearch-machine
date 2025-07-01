@@ -51,7 +51,9 @@ Below is a brief description of the main scripts and where their outputs are wri
   directory.
 - `pipeline.py` and `run_pipeline.py` orchestrate the entire workflow—ingestion,
   metadata extraction, aggregation and narrative generation—when run from the
-  command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model` options to override the default OpenAI models for metadata extraction, narrative generation and snippet embeddings respectively.
+  command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model`
+  options to override the default OpenAI models. The `--retrieval` option
+  selects either the `faiss` index or plain text search for snippet retrieval.
 - `run_smoke_test.py` ingests a single PDF and prints the first few hundred
   characters from each page as a quick sanity check.
 - `utils/data_wipe.py` deletes generated data and logs. Pass `--with-pdfs` to
@@ -192,7 +194,8 @@ python run_pipeline.py \
     --drug <drug-name> \
     --agent1-model <agent1> \
     --agent2-model <agent2> \
-    --embed-model <embed>
+    --embed-model <embed> \
+    --retrieval faiss
 ```
 
 ## Output
