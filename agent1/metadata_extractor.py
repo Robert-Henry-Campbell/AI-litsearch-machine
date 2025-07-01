@@ -26,7 +26,7 @@ class MetadataExtractor:
         self,
         client: Optional[OpenAIJSONCaller] = None,
         *,
-        model: str = "gpt-4-0125-preview",
+        model: str = "gpt-4o-2024-05-13",
     ) -> None:
         self.client = client or OpenAIJSONCaller(model=model)
         META_DIR.mkdir(parents=True, exist_ok=True)

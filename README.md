@@ -52,7 +52,7 @@ Below is a brief description of the main scripts and where their outputs are wri
 - `pipeline.py` and `run_pipeline.py` orchestrate the entire workflow—ingestion,
   metadata extraction, aggregation and narrative generation—when run from the
   command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model`
-  options to override the default OpenAI models. The `--retrieval` option
+  options to override the default OpenAI models. (Agent 1 and Agent 2 default to `gpt-4o-2024-05-13`, embeddings default to `text-embedding-3-small`). The `--retrieval` option
   selects either the `faiss` index or plain text search for snippet retrieval.
 - `run_smoke_test.py` ingests a single PDF and prints the first few hundred
   characters from each page as a quick sanity check.
@@ -197,6 +197,8 @@ python run_pipeline.py \
     --embed-model <embed> \
     --retrieval faiss
 ```
+If not specified, Agent 1 and Agent 2 default to `gpt-4o-2024-05-13`
+and embeddings default to `text-embedding-3-small`.
 
 ## Output
 - Individual metadata JSONs in `data/meta/`.
@@ -236,10 +238,11 @@ Another workflow runs a schema drift unit test to ensure that `PaperMetadata` do
 
 ## API Cost Estimation
 
-The pipeline uses the OpenAI API (for example, GPT-4-Turbo), which is billed per
+The pipeline uses the OpenAI API (for example, GPT-4o), which is billed per
 1,000 tokens. Costs may change, so always check the
 [OpenAI Pricing](https://openai.com/pricing) page for the latest numbers. At the
-time of writing, GPT-4-Turbo is roughly **$0.01 per 1,000 tokens**.
+time of writing, GPT-4o is roughly **$0.005 per 1,000 input tokens** and
+**$0.015 per 1,000 output tokens**.
 
 Estimating cost for a run is easiest when you know roughly how many tokens each
 step consumes:
@@ -248,6 +251,10 @@ step consumes:
   from the API, or about **$0.02 per paper**.
 - **Narrative synthesis**: Producing a narrative review for a single drug usually
   takes 4,000–6,000 tokens (**$0.04–$0.06 per review**).
+
+Embedding generation with `text-embedding-3-small` costs roughly
+**$0.00002 per 1,000 tokens**, so these charges are typically minor compared to
+GPT-4o usage.
 
 For example, processing metadata for 100 papers would cost approximately:
 
