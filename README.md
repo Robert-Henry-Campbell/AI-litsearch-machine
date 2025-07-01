@@ -13,6 +13,8 @@ The end-to-end processing steps are:
 ## Implemented Features
 - **PDF Ingestion**: Automated collection and logging of academic PDFs.
 - **Text Extraction**: Conversion of PDFs to structured, page-wise text files.
+  Extracted text files are renamed to sanitized DOIs so indexing and retrieval
+  use consistent identifiers.
 - **Metadata Extraction (Agent 1)**: Uses the OpenAI API to pull key metadata fields into JSON.
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
 - **Text Retrieval Helper**: Retrieves relevant snippets via the embedding index when available, falling back to keyword search.
@@ -114,6 +116,7 @@ Run `pytest` to execute the test suite. Any test that requires the OpenAI API
 will use your configured key and is skipped automatically if the key is absent.
 Live integration tests that exercise the entire pipeline are located under
 `tests/integration/` and in `tests/agent2/test_openai_narrative_live.py`.
+Sample PDFs for these tests live in `data/test_papers/pdfs`.
 
 ## Usage
 1. Place your academic PDFs in `data/pdfs/`.
