@@ -12,13 +12,15 @@ from agent2.openai_narrative import OpenAINarrative
 BASE_DIR = Path("data")
 MASTER_PATH = BASE_DIR / "master.json"
 OUTPUT_DIR = BASE_DIR / "outputs"
+SNIPPETS_PATH = BASE_DIR / "snippets.json"
 
 
 def set_base_dir(base_dir: Path) -> None:
-    global BASE_DIR, MASTER_PATH, OUTPUT_DIR
+    global BASE_DIR, MASTER_PATH, OUTPUT_DIR, SNIPPETS_PATH
     BASE_DIR = Path(base_dir)
     MASTER_PATH = BASE_DIR / "master.json"
     OUTPUT_DIR = BASE_DIR / "outputs"
+    SNIPPETS_PATH = BASE_DIR / "snippets.json"
 
 
 def load_master() -> List[Dict]:
@@ -56,6 +58,7 @@ def synthesise(drug: str) -> Path:
     if not records:
         raise ValueError(f"No studies found for {drug}")
     snippets = collect_snippets(records, drug)
+    SNIPPETS_PATH.write_bytes(orjson.dumps(snippets))
     generator = OpenAINarrative()
     narrative = generator.generate(records, snippets)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

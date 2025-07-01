@@ -36,6 +36,8 @@ OUTPUT_DIR = DEFAULT_OUTPUT_DIR
 DEFAULT_META_DIR = meta_mod.META_DIR
 DEFAULT_MASTER_PATH = aggregate.MASTER_PATH
 DEFAULT_HISTORY_DIR = aggregate.HISTORY_DIR
+DEFAULT_SNIPPETS_PATH = Path("data/snippets.json")
+SNIPPETS_PATH = DEFAULT_SNIPPETS_PATH
 
 logger = get_logger("pipeline")
 
@@ -52,6 +54,7 @@ def make_dirs(base_dir: Path) -> SimpleNamespace:
         index=base / "index.faiss",
         master=base / "master.json",
         history=base / "master_history",
+        snippets=base / "snippets.json",
     )
 
 
@@ -121,6 +124,7 @@ def generate_narrative(
                     method=retrieval_method,
                 )
             )
+    SNIPPETS_PATH.write_bytes(orjson.dumps(snippets))
     generator = (
         OpenAINarrative(model=agent2_model) if agent2_model else OpenAINarrative()
     )
@@ -154,12 +158,14 @@ def run_pipeline(
 ) -> None:
     """Execute the full data processing pipeline."""
     dirs = make_dirs(base_dir)
-    global TEXT_DIR, OUTPUT_DIR
+    global TEXT_DIR, OUTPUT_DIR, SNIPPETS_PATH
     # Adjust helper module paths if they do not already point inside ``base_dir``.
     if not TEXT_DIR.resolve().is_relative_to(dirs.base):
         TEXT_DIR = dirs.text
     if not OUTPUT_DIR.resolve().is_relative_to(dirs.base):
         OUTPUT_DIR = dirs.outputs
+    if not SNIPPETS_PATH.resolve().is_relative_to(dirs.base):
+        SNIPPETS_PATH = dirs.snippets
     if not meta_mod.META_DIR.resolve().is_relative_to(dirs.base):
         meta_mod.META_DIR = dirs.meta
     if not aggregate.META_DIR.resolve().is_relative_to(dirs.base):
