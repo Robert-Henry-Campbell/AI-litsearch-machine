@@ -7,7 +7,7 @@ This project automates the extraction and synthesis of structured information fr
 - **Text Extraction**: Conversion of PDFs to structured, page-wise text files.
 - **Metadata Extraction (Agent 1)**: Uses the OpenAI API to pull key metadata fields into JSON.
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
-- **Text Retrieval Helper**: Fetches keyword-based snippets from stored PDF text files for downstream RAG tasks.
+- **Text Retrieval Helper**: Retrieves relevant snippets via the embedding index when available, falling back to keyword search.
 - **Text Embeddings**: Splits extracted text into chunks and generates OpenAI embeddings for semantic retrieval.
 - **Embedding Indexing**: Builds a FAISS vector store from extracted text for semantic snippet retrieval.
 - **Embedding-based Retrieval**: Searches the FAISS index for semantically similar text chunks.

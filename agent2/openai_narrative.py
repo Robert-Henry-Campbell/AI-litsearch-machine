@@ -58,7 +58,7 @@ class OpenAINarrative:
     def generate(
         self, metadata: List[Dict], snippets: List[str], *, max_retries: int = 2
     ) -> str:
-        """Generate a narrative review from ``metadata`` and ``snippets``."""
+        """Generate Markdown narrative integrating metadata and text snippets."""
         messages = [
             {"role": "system", "content": self.prompt},
             {"role": "user", "content": self._format_input(metadata, snippets)},
