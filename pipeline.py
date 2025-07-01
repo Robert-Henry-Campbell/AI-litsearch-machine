@@ -3,8 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List
 import time
-import resource
 from dataclasses import dataclass
+
+try:  # resource is not available on Windows
+    import resource  # type: ignore
+except ImportError:  # pragma: no cover - platform specific
+    resource = None  # type: ignore
+
+try:  # fallback for memory metrics on Windows
+    import psutil
+except ImportError:  # pragma: no cover - optional dependency
+    psutil = None  # type: ignore
 
 from utils.logger import get_logger
 
@@ -26,6 +35,15 @@ logger = get_logger("pipeline")
 class StepMetrics:
     duration: float
     memory_kb: int
+
+
+def get_memory_kb() -> int:
+    """Return the current RSS in kilobytes."""
+    if resource is not None:
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    if psutil is not None:
+        return int(psutil.Process().memory_info().rss / 1024)
+    return 0
 
 
 def ingest_pdfs(pdf_dir: str) -> List[Path]:
@@ -84,11 +102,11 @@ def generate_narrative(
 
 def timed_step(step_func, step_name: str, metrics: Dict[str, StepMetrics]) -> None:
     start = time.time()
-    start_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    start_mem = get_memory_kb()
     step_func()
     duration = time.time() - start
-    end_mem = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    mem_delta = end_mem - start_mem
+    end_mem = get_memory_kb()
+    mem_delta = end_mem - start_mem if end_mem and start_mem else 0
     logger.info("%s completed in %.2fs (%+d KB)", step_name, duration, mem_delta)
     metrics[step_name] = StepMetrics(duration=duration, memory_kb=mem_delta)
 
