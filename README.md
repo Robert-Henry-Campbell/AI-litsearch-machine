@@ -196,6 +196,8 @@ python run_pipeline.py \
     --embed-model <embed> \
     --retrieval faiss
 ```
+If not specified, Agent 1 and Agent 2 default to `gpt-4o-2024-05-13`
+and embeddings default to `text-embedding-3-small`.
 
 ## Output
 - Individual metadata JSONs in `data/meta/`.
@@ -235,10 +237,11 @@ Another workflow runs a schema drift unit test to ensure that `PaperMetadata` do
 
 ## API Cost Estimation
 
-The pipeline uses the OpenAI API (for example, GPT-4-Turbo), which is billed per
+The pipeline uses the OpenAI API (for example, GPT-4o), which is billed per
 1,000 tokens. Costs may change, so always check the
 [OpenAI Pricing](https://openai.com/pricing) page for the latest numbers. At the
-time of writing, GPT-4-Turbo is roughly **$0.01 per 1,000 tokens**.
+time of writing, GPT-4o is roughly **$0.005 per 1,000 input tokens** and
+**$0.015 per 1,000 output tokens**.
 
 Estimating cost for a run is easiest when you know roughly how many tokens each
 step consumes:
@@ -247,6 +250,10 @@ step consumes:
   from the API, or about **$0.02 per paper**.
 - **Narrative synthesis**: Producing a narrative review for a single drug usually
   takes 4,000–6,000 tokens (**$0.04–$0.06 per review**).
+
+Embedding generation with `text-embedding-3-small` costs roughly
+**$0.00002 per 1,000 tokens**, so these charges are typically minor compared to
+GPT-4o usage.
 
 For example, processing metadata for 100 papers would cost approximately:
 
