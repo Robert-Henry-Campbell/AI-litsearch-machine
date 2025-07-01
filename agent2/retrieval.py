@@ -6,7 +6,7 @@ from typing import List, Literal
 
 import orjson
 
-from .openai_index import query_index
+from .openai_index import query_index, build_openai_index
 
 BASE_DIR = Path("data")
 TEXT_DIR = BASE_DIR / "text"
@@ -65,6 +65,12 @@ def get_snippets(
         raise ValueError("method must be 'faiss' or 'text'")
 
     if method == "faiss":
+        if not INDEX_PATH.exists():
+            paths = sorted(TEXT_DIR.glob("*.json"))
+            if paths:
+                build_openai_index(
+                    paths, INDEX_PATH, model=embed_model or "text-embedding-3-small"
+                )
         if not INDEX_PATH.exists():
             raise FileNotFoundError(INDEX_PATH)
         try:

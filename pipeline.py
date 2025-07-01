@@ -164,8 +164,7 @@ def run_pipeline(
         meta_mod.META_DIR = dirs.meta
     if not aggregate.META_DIR.resolve().is_relative_to(dirs.base):
         aggregate.set_base_dir(dirs.base)
-    retrieval.TEXT_DIR = dirs.text
-    retrieval.INDEX_PATH = dirs.index
+    retrieval.set_base_dir(dirs.base)
     metrics: Dict[str, StepMetrics] = {}
     timed_step(lambda: ingest_pdfs(pdf_dir, dirs), "Ingestion", metrics)
     timed_step(

@@ -90,3 +90,27 @@ def test_retrieval_cache(tmp_path: Path, monkeypatch) -> None:
     retrieval.get_snippets("10.4/cache", "mendelian", method="faiss")
 
     assert calls["count"] == 1
+
+
+def test_build_index_when_missing(tmp_path: Path, monkeypatch) -> None:
+    text_dir = tmp_path / "text"
+    text_dir.mkdir()
+    _ = create_text_file(text_dir, "10.5/new")
+    index_path = tmp_path / "index.faiss"
+
+    from agent2 import openai_index as oi
+
+    monkeypatch.setattr(
+        oi, "embed_chunks", lambda chunks, model="m": [[0.1] * 2 for _ in chunks]
+    )
+
+    monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
+    monkeypatch.setattr(retrieval, "INDEX_PATH", index_path)
+    monkeypatch.setattr(retrieval, "build_openai_index", oi.build_openai_index)
+
+    result = retrieval.get_snippets(
+        "10.5/new", "mendelian", method="faiss", embed_model="m"
+    )
+
+    assert index_path.exists()
+    assert result
