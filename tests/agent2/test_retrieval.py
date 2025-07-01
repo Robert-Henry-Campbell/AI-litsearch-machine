@@ -59,3 +59,34 @@ def test_embedding_snippets(tmp_path: Path, monkeypatch) -> None:
     result = retrieval.get_snippets("10.3/emb", "mendelian", k=1, method="faiss")
     assert result
     assert "mendelian" in result[0].lower()
+
+
+def test_retrieval_cache(tmp_path: Path, monkeypatch) -> None:
+    text_dir = tmp_path / "text"
+    text_dir.mkdir()
+    file_path = create_text_file(text_dir, "10.4/cache")
+    index_path = tmp_path / "index.faiss"
+
+    from agent2 import openai_index as oi
+
+    monkeypatch.setattr(
+        oi, "embed_chunks", lambda chunks, model="m": [[0.1] * 2 for _ in chunks]
+    )
+    oi.build_openai_index([file_path], index_path, model="m")
+
+    calls = {"count": 0}
+
+    def fake_embed(chunks, model="m"):
+        calls["count"] += 1
+        return [[0.1] * 2 for _ in chunks]
+
+    monkeypatch.setattr(oi, "embed_chunks", fake_embed)
+    oi.clear_cache()
+
+    monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
+    monkeypatch.setattr(retrieval, "INDEX_PATH", index_path)
+
+    retrieval.get_snippets("10.4/cache", "mendelian", method="faiss")
+    retrieval.get_snippets("10.4/cache", "mendelian", method="faiss")
+
+    assert calls["count"] == 1

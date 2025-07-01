@@ -1,6 +1,7 @@
 from pathlib import Path
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+import orjson
 import pytest
 
 import pipeline
@@ -74,3 +75,41 @@ def test_run_pipeline(monkeypatch, tmp_path):
     out_file = tmp_path / "out" / "review_test.md"
     assert out_file.exists()
     assert fake.calls
+
+
+def test_generate_narrative_cache(monkeypatch, tmp_path):
+    from agent2 import openai_index as oi
+    from agent2 import retrieval
+
+    text_dir = tmp_path / "text"
+    text_dir.mkdir()
+    file_path = text_dir / "10.6_cache.json"
+    file_path.write_text('{"pages":[{"page":1,"text":"drug study"}]}')
+    index_path = tmp_path / "index.faiss"
+
+    monkeypatch.setattr(
+        oi, "embed_chunks", lambda chunks, model="m": [[0.1, 0.2] for _ in chunks]
+    )
+    oi.build_openai_index([file_path], index_path, model="m")
+
+    calls = {"count": 0}
+
+    def fake_embed(chunks, model="m"):
+        calls["count"] += 1
+        return [[0.1, 0.2] for _ in chunks]
+
+    monkeypatch.setattr(oi, "embed_chunks", fake_embed)
+    oi.clear_cache()
+
+    monkeypatch.setattr(retrieval, "TEXT_DIR", text_dir)
+    monkeypatch.setattr(retrieval, "INDEX_PATH", index_path)
+    monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "out")
+
+    monkeypatch.setattr("pipeline.OpenAINarrative", lambda *a, **k: FakeNarrative())
+    monkeypatch.setattr("aggregate.MASTER_PATH", tmp_path / "master.json")
+    records = [{"title": "T", "doi": "10.6/cache"}, {"title": "T", "doi": "10.6/cache"}]
+    (tmp_path / "master.json").write_text(orjson.dumps(records).decode())
+
+    pipeline.generate_narrative("drug", embed_model="m", retrieval_method="faiss")
+
+    assert calls["count"] == 1

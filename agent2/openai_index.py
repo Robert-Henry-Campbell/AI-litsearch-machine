@@ -1,13 +1,28 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 import numpy as np
 import orjson
 import faiss
 
 from .embeddings import chunk_text, embed_chunks
+
+_QUERY_CACHE: Dict[Tuple[str, str], Tuple[float, ...]] = {}
+
+
+def _cached_query_embedding(query: str, model: str) -> List[float]:
+    """Return the embedding for ``query`` using ``model`` with caching."""
+    key = (query, model)
+    if key not in _QUERY_CACHE:
+        _QUERY_CACHE[key] = tuple(embed_chunks([query], model=model)[0])
+    return list(_QUERY_CACHE[key])
+
+
+def clear_cache() -> None:
+    """Clear the embedding cache (mainly for tests)."""
+    _QUERY_CACHE.clear()
 
 
 def build_openai_index(
@@ -67,7 +82,7 @@ def query_index(
     index = faiss.read_index(str(index_path))
     chunks = orjson.loads(index_path.with_suffix(".meta.json").read_bytes())
 
-    query_vec = np.array([embed_chunks([query], model=model)[0]], dtype="float32")
+    query_vec = np.array([_cached_query_embedding(query, model)], dtype="float32")
     faiss.normalize_L2(query_vec)
     scores, indices = index.search(query_vec, len(chunks))
 
