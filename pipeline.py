@@ -21,7 +21,7 @@ from utils.logger import get_logger
 import orjson
 
 from ingest.collector import ingest_pdf
-from extract.pdf_to_text import pdf_to_text
+import extract.pdf_to_text as pdf_to_text
 from agent1.metadata_extractor import MetadataExtractor
 import agent1.metadata_extractor as meta_mod
 import aggregate
@@ -78,7 +78,7 @@ def ingest_pdfs(pdf_dir: str, dirs: SimpleNamespace) -> List[Path]:
         if entry is not None:
             paths.append(pdf_path)
         pdf_to_text.DATA_DIR = dirs.text
-        pdf_to_text(pdf_path)
+        pdf_to_text.pdf_to_text(pdf_path)
     return paths
 
 
