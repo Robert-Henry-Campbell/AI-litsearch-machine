@@ -6,6 +6,7 @@ from ingest.collector import ingest_pdf
 from extract.pdf_to_text import pdf_to_text
 from schemas.metadata import PaperMetadata
 from utils.secrets import get_openai_api_key
+from tests.openai_test_utils import ensure_openai_working
 
 import importlib
 import sys
@@ -24,6 +25,7 @@ def test_full_extraction_real_file(
         get_openai_api_key()
     except RuntimeError:
         pytest.skip("OPENAI_API_KEY not found")
+    ensure_openai_working()
 
     monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
@@ -46,6 +48,7 @@ def test_metadata_extractor_prompt_decode_error(
 ) -> None:
     monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")
     monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
+    ensure_openai_working()
     pdf_to_text(pdf_path)
 
     import agent1.openai_client as oc
@@ -69,6 +72,7 @@ def test_run_pipeline_real(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
         get_openai_api_key()
     except RuntimeError:
         pytest.skip("OPENAI_API_KEY not found")
+    ensure_openai_working()
 
     monkeypatch.setattr("ingest.collector.LOG_PATH", tmp_path / "log.jsonl")
     monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
-from typing import List
+from typing import List, Literal
 
 import orjson
 
-from .vector_index import query_index
+from .openai_index import query_index
 
 TEXT_DIR = Path(__file__).resolve().parents[1] / "data" / "text"
 INDEX_PATH = Path(__file__).resolve().parents[1] / "data" / "index.faiss"
@@ -44,22 +44,32 @@ def get_snippets(
     *,
     k: int = 5,
     embed_model: str | None = None,
+    method: Literal["faiss", "text"] = "faiss",
 ) -> List[str]:
     """Return up to ``k`` snippets mentioning ``drug_name`` from ``doi``.
 
-    ``embed_model`` is reserved for future use when snippet retrieval leverages
-    OpenAI embeddings.
+    ``method`` selects the retrieval backend. ``faiss`` uses the embedding index
+    and fails if the index is missing. ``text`` searches the extracted page text
+    directly without requiring the index. ``embed_model`` is only used when
+    ``method`` is ``faiss``.
     """
-    results: List[str] = []
+    if method not in {"faiss", "text"}:
+        raise ValueError("method must be 'faiss' or 'text'")
 
-    if INDEX_PATH.exists():
+    if method == "faiss":
+        if not INDEX_PATH.exists():
+            raise FileNotFoundError(INDEX_PATH)
         try:
-            emb = query_index(doi, drug_name, k=k, index_path=INDEX_PATH)
-            results.extend(r.get("text", "").strip() for r in emb if r.get("text"))
+            emb = query_index(
+                doi,
+                drug_name,
+                k=k,
+                index_path=INDEX_PATH,
+                model=embed_model or "text-embedding-3-small",
+            )
+            return [r.get("text", "").strip() for r in emb if r.get("text")][:k]
         except Exception:
-            results = []
+            return []
 
-    if len(results) < k:
-        results.extend(_keyword_snippets(doi, drug_name))
-
-    return results[:k]
+    # method == "text"
+    return _keyword_snippets(doi, drug_name)[:k]

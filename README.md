@@ -40,7 +40,10 @@ Below is a brief description of the main scripts and where their outputs are wri
 - `agent2/retrieval.py` returns relevant snippets from page text or the FAISS embedding index.
 - `agent2/embeddings.py` provides helpers for chunking text and generating
   embedding vectors via OpenAI.
-- `agent2/vector_index.py` builds and queries the FAISS index used for semantic snippet retrieval.
+- `create_embeddings.py` builds a FAISS index of OpenAI embeddings from the
+  extracted text files. Use `--model` to choose the embedding model.
+- `agent2/openai_index.py` builds and queries the FAISS index used for semantic
+  snippet retrieval.
 - `agent2/openai_narrative.py` uses the OpenAI API to turn metadata and
   snippets into a narrative review string.
 - `agent2/synthesiser.py` is a command-line wrapper that filters `master.json`
@@ -48,7 +51,9 @@ Below is a brief description of the main scripts and where their outputs are wri
   directory.
 - `pipeline.py` and `run_pipeline.py` orchestrate the entire workflow—ingestion,
   metadata extraction, aggregation and narrative generation—when run from the
-  command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model` options to override the default OpenAI models for metadata extraction, narrative generation and snippet embeddings respectively.
+  command line. Use the `--agent1-model`, `--agent2-model` and `--embed-model`
+  options to override the default OpenAI models. The `--retrieval` option
+  selects either the `faiss` index or plain text search for snippet retrieval.
 - `run_smoke_test.py` ingests a single PDF and prints the first few hundred
   characters from each page as a quick sanity check.
 - `utils/data_wipe.py` deletes generated data and logs. Pass `--with-pdfs` to
@@ -123,22 +128,16 @@ python extract/pdf_to_text.py path/to/paper.pdf
 ```
 Both commands expect a single PDF file path and should be run for every paper.
 
-3. Build the embedding index from the extracted text:
+3. Build the embedding index from the extracted text using OpenAI embeddings:
 
 ```bash
-python - <<'EOF'
-from pathlib import Path
-from agent2.vector_index import build_vector_index
-
-text_dir = Path("data/text")
-index = Path("data/index.faiss")
-build_vector_index(list(text_dir.glob("*.json")), index)
-EOF
+python create_embeddings.py --text-dir data/text --index data/index.faiss \
+    --model text-embedding-3-small
 ```
 
-This indexing step uses local TF‑IDF vectors and does not call the OpenAI API.
-The resulting `data/index.faiss` and its metadata can be reused across
-pipeline runs, so you only need to build the index once per corpus.
+This step calls the OpenAI API to generate embeddings. The resulting
+`data/index.faiss` and metadata files can be reused across runs, so you only
+need to build the index once per corpus.
 
 4. Execute Agent 1 to extract metadata by pointing it to a text JSON file:
 
@@ -195,7 +194,8 @@ python run_pipeline.py \
     --drug <drug-name> \
     --agent1-model <agent1> \
     --agent2-model <agent2> \
-    --embed-model <embed>
+    --embed-model <embed> \
+    --retrieval faiss
 ```
 
 ## Output

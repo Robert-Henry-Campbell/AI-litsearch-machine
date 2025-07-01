@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Literal
 import time
 from dataclasses import dataclass
 
@@ -77,6 +77,7 @@ def generate_narrative(
     *,
     agent2_model: str | None = None,
     embed_model: str | None = None,
+    retrieval_method: Literal["faiss", "text"] = "faiss",
 ) -> Path:
     """Generate a narrative review from ``master.json`` using ``drug_name``."""
     master_path = aggregate.MASTER_PATH
@@ -88,7 +89,12 @@ def generate_narrative(
         doi = record.get("doi")
         if doi:
             snippets.extend(
-                retrieval.get_snippets(doi, drug_name, embed_model=embed_model)
+                retrieval.get_snippets(
+                    doi,
+                    drug_name,
+                    embed_model=embed_model,
+                    method=retrieval_method,
+                )
             )
     generator = (
         OpenAINarrative(model=agent2_model) if agent2_model else OpenAINarrative()
@@ -118,6 +124,7 @@ def run_pipeline(
     agent1_model: str | None = None,
     agent2_model: str | None = None,
     embed_model: str | None = None,
+    retrieval_method: Literal["faiss", "text"] = "faiss",
 ) -> None:
     """Execute the full data processing pipeline."""
     metrics: Dict[str, StepMetrics] = {}
@@ -133,6 +140,7 @@ def run_pipeline(
             drug_name,
             agent2_model=agent2_model,
             embed_model=embed_model,
+            retrieval_method=retrieval_method,
         ),
         "Narrative Generation",
         metrics,
@@ -153,6 +161,12 @@ if __name__ == "__main__":
     parser.add_argument("--agent1-model", help="Model for metadata extraction")
     parser.add_argument("--agent2-model", help="Model for narrative generation")
     parser.add_argument("--embed-model", help="Model for text embeddings")
+    parser.add_argument(
+        "--retrieval",
+        choices=["faiss", "text"],
+        default="faiss",
+        help="Snippet retrieval backend (default: faiss)",
+    )
     args = parser.parse_args()
 
     run_pipeline(
@@ -161,4 +175,5 @@ if __name__ == "__main__":
         agent1_model=args.agent1_model,
         agent2_model=args.agent2_model,
         embed_model=args.embed_model,
+        retrieval_method=args.retrieval,
     )
