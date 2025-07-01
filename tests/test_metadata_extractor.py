@@ -59,6 +59,20 @@ def test_extract_success(tmp_path, monkeypatch):
     assert client.calls == 1
 
 
+def test_text_file_renamed(tmp_path, monkeypatch):
+    from agent1.metadata_extractor import MetadataExtractor
+
+    text_path = create_text_file(tmp_path, "paper")
+    monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
+    client = FakeClient([valid_data()])
+    extractor = MetadataExtractor(client=client)
+    result = extractor.extract(text_path, "Drug")
+    assert result is not None
+    renamed = text_path.with_name("10.1_abc.json")
+    assert renamed.exists()
+    assert not text_path.exists()
+
+
 def test_extract_retry(tmp_path, monkeypatch):
     from agent1.metadata_extractor import MetadataExtractor
 
