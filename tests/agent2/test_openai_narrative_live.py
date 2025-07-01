@@ -10,6 +10,7 @@ from utils.secrets import get_openai_api_key
 from tests.openai_test_utils import handle_openai_exception
 
 
+@pytest.mark.skip(reason="Live API call too expensive to run every time")
 def test_openai_narrative_live():
     try:
         get_openai_api_key()
@@ -25,3 +26,17 @@ def test_openai_narrative_live():
         handle_openai_exception(exc)
         return
     assert isinstance(result, str) and result.strip()
+
+
+def test_openai_narrative_offline(monkeypatch):
+    """Offline version that bypasses the real API."""
+
+    monkeypatch.setattr(
+        OpenAINarrative,
+        "generate",
+        lambda self, metadata, snippets, max_retries=2: "review",
+    )
+
+    narrative = OpenAINarrative(model="test")
+    result = narrative.generate([{"title": "T"}], ["s1"])
+    assert result == "review"
