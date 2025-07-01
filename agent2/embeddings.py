@@ -50,7 +50,9 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> List[str]
     return chunks
 
 
-def embed_chunks(chunks: List[str]) -> List[List[float]]:
+def embed_chunks(
+    chunks: List[str], *, model: str = "text-embedding-3-small"
+) -> List[List[float]]:
     """Generate embeddings for each text chunk using OpenAI's embeddings API."""
     if not chunks:
         return []
@@ -61,7 +63,7 @@ def embed_chunks(chunks: List[str]) -> List[List[float]]:
         start_time = time.time()
         try:
             response = client.embeddings.create(
-                model="text-embedding-3-small",
+                model=model,
                 input=chunks,
             )
         except AuthError as exc:  # pragma: no cover - auth errors
