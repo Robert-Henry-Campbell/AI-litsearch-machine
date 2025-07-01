@@ -223,7 +223,8 @@ Most modules emit standardized logs using Python's ``logging`` module. The
 pipeline and OpenAI helpers record timestamps, log levels and token usage.
 These logs include API timing information to help estimate costs and detect
 rate-limit issues. The pipeline also reports the duration and memory delta of
-each major step so you can identify slow stages. The ingestion and PDF
+each major step so you can identify slow stages. On Unix this uses the
+`resource` module, while Windows falls back to `psutil`. The ingestion and PDF
 extraction scripts simply produce output files and do not currently log.
 
 ## Contributing
