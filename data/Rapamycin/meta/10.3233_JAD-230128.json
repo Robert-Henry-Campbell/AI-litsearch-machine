@@ -1,0 +1,1 @@
+{"title":"Causal Association Between mTOR-Dependent Protein Levels and Alzheimer’s Disease: A Mendelian Randomization Study","authors":"Hong-Yan Cai et al. (2023)","doi":"10.3233/JAD-230128","pub_date":"2023-06-30","data_sources":["INTERVAL","International Genomics of Alzheimer’s Project"],"omics_modalities":["pQTL"],"targets":["Rapamycin"],"p_threshold":"5×10-6","ld_r2":"0.001"}

@@ -1,0 +1,187 @@
+[
+  {
+    "title": "Genetic Evidence Supporting Causal Roles of mTOR-Dependent Proteins in Rheumatic Fever: A Two-Sample Randomized Mendelian Study",
+    "authors": "Yan-Fei Mu et al. (2023)",
+    "doi": "10.1007/s12325-022-02419-4",
+    "pub_date": "2023-02-11",
+    "data_sources": [
+      "INTERVAL",
+      "Integrative Epidemiology Unit GWAS database"
+    ],
+    "omics_modalities": null,
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5 9 10–6",
+    "ld_r2": "0.001"
+  },
+  {
+    "title": "Genetic Evidence Supporting a Causal Association Between mTOR-Dependent EIF-4E Circulating Protein Level and Osteoporosis",
+    "authors": "Ting Cheng et al. (2023)",
+    "doi": "10.1007/s12325-023-02676-x",
+    "pub_date": "2023-09-20",
+    "data_sources": [
+      "INTERVAL",
+      "GEFOS",
+      "IEU GWAS"
+    ],
+    "omics_modalities": [
+      "pQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5 9 10-6",
+    "ld_r2": "0.001"
+  },
+  {
+    "title": "Genetically Determined Levels of mTOR-Dependent Circulating Proteins and Risk of Multiple Sclerosis",
+    "authors": "Yao-Chen Zhang et al. (2023)",
+    "doi": "10.1007/s40120-023-00455-y",
+    "pub_date": "2023-03-04",
+    "data_sources": [
+      "International Multiple Sclerosis Genetics Consortium",
+      "INTERVAL"
+    ],
+    "omics_modalities": [
+      "pQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "1e-5",
+    "ld_r2": "0.01"
+  },
+  {
+    "title": "Sirolimus as a repurposed drug for tendinopathy: A systems biology approach combining computational and experimental methods",
+    "authors": "Zetao Wang et al. (2025)",
+    "doi": "10.1016/j.compbiomed.2025.109665",
+    "pub_date": "2025-01-13",
+    "data_sources": [
+      "FinnGen Consortium",
+      "INTERVAL study",
+      "Global Lipids Genetics Consortium"
+    ],
+    "omics_modalities": [
+      "transcriptomics",
+      "GWAS",
+      "proteomics"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "1e-06",
+    "ld_r2": "0.05"
+  },
+  {
+    "title": "The causal effect of mTORC1-dependent circulating protein levels on nonalcoholic fatty liver disease: A Mendelian randomization study",
+    "authors": "Xiangyu Yan et al. (2024)",
+    "doi": "10.1016/j.dld.2023.09.017",
+    "pub_date": "2023-09-29",
+    "data_sources": [
+      "INTERVAL",
+      "FinnGen",
+      "UK Biobank"
+    ],
+    "omics_modalities": [
+      "pQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5 × 10−6",
+    "ld_r2": "0.05"
+  },
+  {
+    "title": "Association of mTORC1-dependent circulating protein levels with cataract formation: a mendelian randomization study",
+    "authors": "Cai et al. (2022)",
+    "doi": "10.1186/s12864-022-08925-7",
+    "pub_date": "2022-09-28",
+    "data_sources": [
+      "INTERVAL",
+      "FinnGen"
+    ],
+    "omics_modalities": [
+      "pQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5 × 10− 6",
+    "ld_r2": "0.05"
+  },
+  {
+    "title": "Causal Association Between mTOR-Dependent Protein Levels and Alzheimer’s Disease: A Mendelian Randomization Study",
+    "authors": "Hong-Yan Cai et al. (2023)",
+    "doi": "10.3233/JAD-230128",
+    "pub_date": "2023-06-30",
+    "data_sources": [
+      "INTERVAL",
+      "International Genomics of Alzheimer’s Project"
+    ],
+    "omics_modalities": [
+      "pQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5×10-6",
+    "ld_r2": "0.001"
+  },
+  {
+    "title": "Causal association between mTOR-dependent circulating protein levels and central precocious puberty: a Mendelian randomization study",
+    "authors": "Ying Y, Yu Z and Wu L (2024)",
+    "doi": "10.3389/fendo.2024.1360043",
+    "pub_date": "2024-03-07",
+    "data_sources": [
+      "INTERVAL",
+      "eQTLGen",
+      "FinnGen Consortium"
+    ],
+    "omics_modalities": [
+      "proteomics-GWAS",
+      "eQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5×10-6",
+    "ld_r2": "0.001"
+  },
+  {
+    "title": "mTORC1-Dependent Protein and Parkinson’s Disease: A Mendelian Randomization Study",
+    "authors": "Cheng Tan et al. (2023)",
+    "doi": "10.3390/brainsci13040536",
+    "pub_date": "2023-03-24",
+    "data_sources": [
+      "INTERVAL",
+      "International Parkinson’s Disease Genomics Consortium"
+    ],
+    "omics_modalities": [
+      "Human Plasma Proteome Atlas"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5 × 10−6",
+    "ld_r2": "0.05"
+  },
+  {
+    "title": "causal association between mtoR‑dependent EIF‑4E and EIF‑4A circulating protein levels and type 2 diabetes: a Mendelian randomization study",
+    "authors": "Ghada A. Soliman et al. (2020)",
+    "doi": "https://doi.org/10.1038/s41598-020-71987-8",
+    "pub_date": "2020-08-19",
+    "data_sources": [
+      "INTERVAL",
+      "DIAGRAM"
+    ],
+    "omics_modalities": [
+      "pQTL"
+    ],
+    "targets": [
+      "Rapamycin"
+    ],
+    "p_threshold": "5 × 10–6",
+    "ld_r2": "0.05"
+  }
+]

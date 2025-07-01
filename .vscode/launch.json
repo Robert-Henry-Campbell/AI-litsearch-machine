@@ -2,14 +2,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Pipeline with Args",
+      // 🔧 VS Code: Run the full pipeline for a single drug.
+      // currently set up for Rapamycin
+      "name": "Run Pipeline (per-drug)",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/run_pipeline.py",
       "args": [
-        "--pdf_dir", "data/pdfs",
-        "--drug", "SGLT2"
+        "--pdf_dir", "data/Rapamycin/pdfs",
+        "--drug",    "Rapamycin",
+        "--base_dir","data/Rapamycin",
+        "--agent1-model", "gpt-4o-2024-05-13",
+        "--agent2-model", "gpt-4o-2024-05-13",
+        "--embed-model",  "text-embedding-3-small",
+        "--retrieval",    "faiss"
       ],
+      // Reads OPENAI_API_KEY from .env at the repo root
       "envFile": "${workspaceFolder}/.env",
       "console": "integratedTerminal"
     }
