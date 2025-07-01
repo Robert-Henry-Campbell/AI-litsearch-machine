@@ -3,9 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 import orjson
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-META_DIR = DATA_DIR / "meta"
-MASTER_PATH = DATA_DIR / "master.json"
+BASE_DIR = Path("data")
+META_DIR = BASE_DIR / "meta"
+MASTER_PATH = BASE_DIR / "master.json"
+
+
+def set_base_dir(base_dir: Path) -> None:
+    """Update path constants based on ``base_dir``."""
+    global BASE_DIR, META_DIR, MASTER_PATH
+    BASE_DIR = Path(base_dir)
+    META_DIR = BASE_DIR / "meta"
+    MASTER_PATH = BASE_DIR / "master.json"
 
 
 def validate_file(path: Path) -> bool:

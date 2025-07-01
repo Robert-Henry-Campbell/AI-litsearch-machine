@@ -2,7 +2,7 @@ from pathlib import Path
 import orjson
 
 import agent2.openai_index as oi
-import create_embeddings
+import build_embeddings
 
 
 def create_text_file(dir_path: Path, doi: str, text: str) -> Path:
@@ -39,22 +39,13 @@ def test_cli_main(tmp_path, monkeypatch):
         calls["index"] = index_path
         calls["model"] = model
 
-    monkeypatch.setattr("create_embeddings.build_openai_index", fake_build)
+    monkeypatch.setattr("build_embeddings.build_openai_index", fake_build)
 
-    code = create_embeddings.main(
-        [
-            "--text-dir",
-            str(text_dir),
-            "--index",
-            str(tmp_path / "idx.faiss"),
-            "--model",
-            "m",
-        ]
-    )
+    code = build_embeddings.main(["--base_dir", str(tmp_path), "--model", "m"])
 
     assert code == 0
     assert calls == {
         "count": 1,
-        "index": Path(tmp_path / "idx.faiss"),
+        "index": Path(tmp_path / "index.faiss"),
         "model": "m",
     }

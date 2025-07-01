@@ -8,8 +8,16 @@ import orjson
 
 from .openai_index import query_index
 
-TEXT_DIR = Path(__file__).resolve().parents[1] / "data" / "text"
-INDEX_PATH = Path(__file__).resolve().parents[1] / "data" / "index.faiss"
+BASE_DIR = Path("data")
+TEXT_DIR = BASE_DIR / "text"
+INDEX_PATH = BASE_DIR / "index.faiss"
+
+
+def set_base_dir(base_dir: Path) -> None:
+    global BASE_DIR, TEXT_DIR, INDEX_PATH
+    BASE_DIR = Path(base_dir)
+    TEXT_DIR = BASE_DIR / "text"
+    INDEX_PATH = BASE_DIR / "index.faiss"
 
 
 def _safe_name(doi: str) -> str:

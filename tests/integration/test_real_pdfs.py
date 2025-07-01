@@ -87,7 +87,9 @@ def test_run_pipeline_real(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setattr("agent2.retrieval.TEXT_DIR", tmp_path / "text")
     monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "out")
 
-    pipeline.run_pipeline("data/pdfs", "sglt2i", retrieval_method="text")
+    pipeline.run_pipeline(
+        "data/pdfs", "sglt2i", base_dir=tmp_path, retrieval_method="text"
+    )
 
     master = tmp_path / "master.json"
     assert master.exists()
@@ -171,7 +173,9 @@ def test_run_pipeline_real_offline(
     )
     monkeypatch.setattr(pipeline, "OpenAINarrative", lambda *a, **k: FakeNarrative())
 
-    pipeline.run_pipeline("data/pdfs", "sglt2i", retrieval_method="text")
+    pipeline.run_pipeline(
+        "data/pdfs", "sglt2i", base_dir=tmp_path, retrieval_method="text"
+    )
 
     master = tmp_path / "master.json"
     assert master.exists()

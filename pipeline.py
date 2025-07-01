@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Literal
 import time
 from dataclasses import dataclass
+from types import SimpleNamespace
 
 try:  # resource is not available on Windows
     import resource  # type: ignore
@@ -20,15 +21,38 @@ from utils.logger import get_logger
 import orjson
 
 from ingest.collector import ingest_pdf
-from extract.pdf_to_text import pdf_to_text, DATA_DIR as TEXT_DIR
+from extract.pdf_to_text import pdf_to_text
 from agent1.metadata_extractor import MetadataExtractor
+import agent1.metadata_extractor as meta_mod
 import aggregate
 from agent2.openai_narrative import OpenAINarrative
 from agent2 import retrieval
 
-OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+
+DEFAULT_TEXT_DIR = Path("data/text")
+TEXT_DIR = DEFAULT_TEXT_DIR
+DEFAULT_OUTPUT_DIR = Path("data/outputs")
+OUTPUT_DIR = DEFAULT_OUTPUT_DIR
+DEFAULT_META_DIR = meta_mod.META_DIR
+DEFAULT_MASTER_PATH = aggregate.MASTER_PATH
+DEFAULT_HISTORY_DIR = aggregate.HISTORY_DIR
 
 logger = get_logger("pipeline")
+
+
+def make_dirs(base_dir: Path) -> SimpleNamespace:
+    """Return a namespace of all pipeline paths derived from ``base_dir``."""
+    base = Path(base_dir)
+    return SimpleNamespace(
+        base=base,
+        pdfs=base / "pdfs",
+        text=base / "text",
+        meta=base / "meta",
+        outputs=base / "outputs",
+        index=base / "index.faiss",
+        master=base / "master.json",
+        history=base / "master_history",
+    )
 
 
 @dataclass
@@ -46,13 +70,14 @@ def get_memory_kb() -> int:
     return 0
 
 
-def ingest_pdfs(pdf_dir: str) -> List[Path]:
+def ingest_pdfs(pdf_dir: str, dirs: SimpleNamespace) -> List[Path]:
     """Ingest all PDFs in *pdf_dir* and extract their text."""
     paths = []
     for pdf_path in sorted(Path(pdf_dir).glob("*.pdf")):
         entry = ingest_pdf(pdf_path)
         if entry is not None:
             paths.append(pdf_path)
+        pdf_to_text.DATA_DIR = dirs.text
         pdf_to_text(pdf_path)
     return paths
 
@@ -121,20 +146,37 @@ def run_pipeline(
     pdf_dir: str,
     drug_name: str,
     *,
+    base_dir: Path = Path("data"),
     agent1_model: str | None = None,
     agent2_model: str | None = None,
     embed_model: str | None = None,
     retrieval_method: Literal["faiss", "text"] = "faiss",
 ) -> None:
     """Execute the full data processing pipeline."""
+    dirs = make_dirs(base_dir)
+    global TEXT_DIR, OUTPUT_DIR
+    if TEXT_DIR == DEFAULT_TEXT_DIR:
+        TEXT_DIR = dirs.text
+    if OUTPUT_DIR == DEFAULT_OUTPUT_DIR:
+        OUTPUT_DIR = dirs.outputs
+    if meta_mod.META_DIR == DEFAULT_META_DIR:
+        meta_mod.META_DIR = dirs.meta
+    if aggregate.META_DIR == DEFAULT_META_DIR:
+        aggregate.META_DIR = dirs.meta
+    if aggregate.MASTER_PATH == DEFAULT_MASTER_PATH:
+        aggregate.MASTER_PATH = dirs.master
+    if aggregate.HISTORY_DIR == DEFAULT_HISTORY_DIR:
+        aggregate.HISTORY_DIR = dirs.history
+    retrieval.TEXT_DIR = dirs.text
+    retrieval.INDEX_PATH = dirs.index
     metrics: Dict[str, StepMetrics] = {}
-    timed_step(lambda: ingest_pdfs(pdf_dir), "Ingestion", metrics)
+    timed_step(lambda: ingest_pdfs(pdf_dir, dirs), "Ingestion", metrics)
     timed_step(
         lambda: extract_metadata_from_text(drug_name, agent1_model=agent1_model),
         "Metadata Extraction",
         metrics,
     )
-    timed_step(aggregate.aggregate_metadata, "Aggregation", metrics)
+    timed_step(lambda: aggregate.aggregate_metadata(), "Aggregation", metrics)
     timed_step(
         lambda: generate_narrative(
             drug_name,
@@ -158,6 +200,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the full pipeline")
     parser.add_argument("--pdf-dir", required=True, help="Directory with PDFs")
     parser.add_argument("--drug", required=True, help="Drug name for snippets")
+    parser.add_argument(
+        "--base-dir",
+        default="data",
+        help="Base output directory (default: data)",
+    )
     parser.add_argument("--agent1-model", help="Model for metadata extraction")
     parser.add_argument("--agent2-model", help="Model for narrative generation")
     parser.add_argument("--embed-model", help="Model for text embeddings")
@@ -172,6 +219,7 @@ if __name__ == "__main__":
     run_pipeline(
         args.pdf_dir,
         args.drug,
+        base_dir=Path(args.base_dir),
         agent1_model=args.agent1_model,
         agent2_model=args.agent2_model,
         embed_model=args.embed_model,
