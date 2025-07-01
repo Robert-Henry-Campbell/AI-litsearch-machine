@@ -8,6 +8,7 @@ This project automates the extraction and synthesis of structured information fr
 - **Metadata Extraction (Agent 1)**: Uses the OpenAI API to pull key metadata fields into JSON.
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
 - **Text Retrieval Helper**: Fetches keyword-based snippets from stored PDF text files for downstream RAG tasks.
+- **Text Embeddings**: Splits extracted text into chunks and generates OpenAI embeddings for semantic retrieval.
 - **Narrative Review Generation (Agent 2)**: Generates peer-review style summaries using `agent2/openai_narrative.py`.
 
 ## Script Overview
@@ -28,6 +29,8 @@ Below is a brief description of the main scripts and where their outputs are wri
   structure. It prints results to the console without writing new files.
 - `agent2/retrieval.py` loads page text from `data/text/` and returns short
   excerpts around a keyword for downstream use.
+- `agent2/embeddings.py` provides helpers for chunking text and generating
+  embedding vectors via OpenAI.
 - `agent2/openai_narrative.py` uses the OpenAI API to turn metadata and
   snippets into a narrative review string.
 - `agent2/synthesiser.py` is a command-line wrapper that filters `master.json`
