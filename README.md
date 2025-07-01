@@ -13,6 +13,8 @@ The end-to-end processing steps are:
 ## Implemented Features
 - **PDF Ingestion**: Automated collection and logging of academic PDFs.
 - **Text Extraction**: Conversion of PDFs to structured, page-wise text files.
+  Extracted text files are renamed to sanitized DOIs so indexing and retrieval
+  use consistent identifiers.
 - **Metadata Extraction (Agent 1)**: Uses the OpenAI API to pull key metadata fields into JSON.
 - **Data Aggregation**: Collates individual metadata JSON files into a master dataset.
 - **Text Retrieval Helper**: Retrieves relevant snippets via the embedding index when available, falling back to keyword search.

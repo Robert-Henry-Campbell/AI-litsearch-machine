@@ -58,6 +58,14 @@ class MetadataExtractor:
         )
         out_path = META_DIR / f"{name}.json"
         out_path.write_bytes(orjson.dumps(metadata.model_dump()))
+
+        if text_path is not None:
+            new_text_path = text_path.with_name(f"{name}.json")
+            if new_text_path != text_path:
+                try:
+                    text_path.rename(new_text_path)
+                except FileExistsError:
+                    pass
         return out_path
 
     def extract(
