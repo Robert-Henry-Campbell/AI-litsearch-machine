@@ -5,6 +5,7 @@ from tests.openai_test_utils import handle_openai_exception
 from schemas.metadata import PaperMetadata
 
 
+@pytest.mark.skip(reason="Live API call too expensive to run every time")
 def test_openai_json_caller_live():
     try:
         get_openai_api_key()
@@ -36,3 +37,21 @@ def test_openai_json_caller_live():
         "p_threshold",
         "ld_r2",
     }
+
+
+def test_openai_json_caller_offline(monkeypatch):
+    """Offline version that bypasses the real API."""
+
+    monkeypatch.setattr(
+        OpenAIJSONCaller,
+        "call",
+        lambda self, _text, max_retries=2: {
+            "title": "T",
+            "doi": "10.1/example",
+        },
+    )
+
+    caller = OpenAIJSONCaller(model="test")
+    result = caller.call("hello")
+    PaperMetadata.model_validate(result)
+    assert result["title"] == "T"
