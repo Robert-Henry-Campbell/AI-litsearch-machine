@@ -137,6 +137,10 @@ build_vector_index(list(text_dir.glob("*.json")), index)
 EOF
 ```
 
+This indexing step uses local TF‑IDF vectors and does not call the OpenAI API.
+The resulting `data/index.faiss` and its metadata can be reused across
+pipeline runs, so you only need to build the index once per corpus.
+
 4. Execute Agent 1 to extract metadata by pointing it to a text JSON file:
 
 ```bash
