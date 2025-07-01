@@ -50,7 +50,7 @@ def _usage_get(usage: Any, key: str) -> Any:
 class OpenAIJSONCaller:
     """Helper for calling OpenAI's chat completion API in JSON mode."""
 
-    def __init__(self, model: str = "gpt-4-0125-preview") -> None:
+    def __init__(self, model: str = "gpt-4o-2024-05-13") -> None:
         self.model = model
         with PROMPT_PATH.open("r", encoding="utf-8") as f:
             self.prompt = f.read()
