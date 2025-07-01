@@ -8,4 +8,4 @@ RUN /root/.pyenv/versions/3.11.12/bin/pip \
 
 # New: make Python the entry-point
 ENTRYPOINT ["/root/.pyenv/versions/3.11.12/bin/python"]
-CMD ["run_pipeline.py"]
+#CMD ["run_pipeline.py"]

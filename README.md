@@ -65,7 +65,7 @@ Clone the repository and create a virtual environment:
 git clone https://github.com/yourusername/your-repo.git
 cd your-repo
 python3 -m venv venv
-source venv/bin/activate
+source .venv/Scripts/activate
 ```
 
 Install dependencies from the provided requirements file:

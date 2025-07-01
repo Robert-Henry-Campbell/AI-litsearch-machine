@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Pipeline with Args",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_pipeline.py",
+      "args": [
+        "--pdf_dir", "data/pdfs",
+        "--drug", "SGLT2"
+      ],
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    }
+  ]
+}
