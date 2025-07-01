@@ -79,3 +79,5 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
 
     out_file = tmp_path / "outputs" / "review_TestDrug.md"
     assert out_file.exists()
+    snippets_path = tmp_path / "snippets.json"
+    assert snippets_path.exists()

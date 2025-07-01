@@ -207,6 +207,7 @@ and embeddings default to `text-embedding-3-small`.
 - Individual metadata JSONs in `data/meta/`.
 - Aggregated metadata in `data/master.json`.
 - Generated narrative reviews in `outputs/`.
+- Retrieved snippets saved to `snippets.json` before the narrative step.
 - For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
 ## Cleaning Up Generated Data
