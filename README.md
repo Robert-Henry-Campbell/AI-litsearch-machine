@@ -2,6 +2,14 @@
 
 This project automates the extraction and synthesis of structured information from academic PDFs. It is designed to streamline literature reviews of Mendelian Randomization (MR) studies across various pharmacological agents.
 
+## Pipeline Flow
+The end-to-end processing steps are:
+
+1. **PDF → Text** – each PDF is converted to a JSON file of page text.
+2. **Text → Embeddings** – the extracted text is chunked and embedded, building a FAISS index for semantic search.
+3. **Retrieve Snippets + Structured JSON** – relevant snippets are pulled from the embedding index and combined with metadata extracted by Agent&nbsp;1.
+4. **Narrative Review** – Agent&nbsp;2 generates a review using both the metadata and retrieved snippets.
+
 ## Implemented Features
 - **PDF Ingestion**: Automated collection and logging of academic PDFs.
 - **Text Extraction**: Conversion of PDFs to structured, page-wise text files.
@@ -29,10 +37,10 @@ Below is a brief description of the main scripts and where their outputs are wri
   and any invalid files are logged to `data/aggregation_errors.log`.
 - `utils/json_validator.py` checks every JSON file for UTF‑8 encoding and valid
   structure. It prints results to the console without writing new files.
-- `agent2/retrieval.py` loads page text from `data/text/` and returns short
-  excerpts around a keyword for downstream use.
+- `agent2/retrieval.py` returns relevant snippets from page text or the FAISS embedding index.
 - `agent2/embeddings.py` provides helpers for chunking text and generating
   embedding vectors via OpenAI.
+- `agent2/vector_index.py` builds and queries the FAISS index used for semantic snippet retrieval.
 - `agent2/openai_narrative.py` uses the OpenAI API to turn metadata and
   snippets into a narrative review string.
 - `agent2/synthesiser.py` is a command-line wrapper that filters `master.json`
@@ -116,7 +124,20 @@ python extract/pdf_to_text.py path/to/paper.pdf
 ```
 Both commands expect a single PDF file path and should be run for every paper.
 
-3. Execute Agent 1 to extract metadata by pointing it to a text JSON file:
+3. Build the embedding index from the extracted text:
+
+```bash
+python - <<'EOF'
+from pathlib import Path
+from agent2.vector_index import build_vector_index
+
+text_dir = Path("data/text")
+index = Path("data/index.faiss")
+build_vector_index(list(text_dir.glob("*.json")), index)
+EOF
+```
+
+4. Execute Agent 1 to extract metadata by pointing it to a text JSON file:
 
 ```bash
 python -m agent1.metadata_extractor data/text/paper.json
@@ -128,7 +149,7 @@ If you prefer running the script directly, set `PYTHONPATH=$(pwd)` first:
 PYTHONPATH=$(pwd) python agent1/metadata_extractor.py data/text/paper.json
 ```
 
-4. Aggregate metadata:
+5. Aggregate metadata:
 
 ```bash
 python aggregate.py
@@ -136,7 +157,7 @@ python aggregate.py
 This command reports how many files were aggregated and any that were skipped due
 to validation errors.
 
-5. Validate JSON integrity:
+6. Validate JSON integrity:
 
 ```bash
 python utils/json_validator.py
@@ -144,7 +165,7 @@ python utils/json_validator.py
 This checks all files in `data/meta/` and `data/master.json` for UTF-8 encoding
 and valid JSON structure.
 
-6. Generate narrative reviews with Agent 2 programmatically:
+7. Generate narrative reviews with Agent 2 programmatically:
 
 ```python
 from agent2.openai_narrative import OpenAINarrative
@@ -163,7 +184,7 @@ python agent2/synthesiser.py --drug <drug-name>
 ```
 
 
-6. Run the entire pipeline in one step using the CLI script:
+8. Run the entire pipeline in one step using the CLI script:
 
 ```bash
 python run_pipeline.py --pdf_dir data/pdfs --drug <drug-name> --model <model-name>
