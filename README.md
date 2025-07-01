@@ -42,7 +42,8 @@ Below is a brief description of the main scripts and where their outputs are wri
   embedding vectors via OpenAI.
 - `create_embeddings.py` builds a FAISS index of OpenAI embeddings from the
   extracted text files. Use `--model` to choose the embedding model.
-- `agent2/vector_index.py` builds and queries the FAISS index used for semantic snippet retrieval.
+- `agent2/openai_index.py` builds and queries the FAISS index used for semantic
+  snippet retrieval.
 - `agent2/openai_narrative.py` uses the OpenAI API to turn metadata and
   snippets into a narrative review string.
 - `agent2/synthesiser.py` is a command-line wrapper that filters `master.json`

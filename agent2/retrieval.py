@@ -6,7 +6,7 @@ from typing import List
 
 import orjson
 
-from .vector_index import query_index
+from .openai_index import query_index
 
 TEXT_DIR = Path(__file__).resolve().parents[1] / "data" / "text"
 INDEX_PATH = Path(__file__).resolve().parents[1] / "data" / "index.faiss"
@@ -47,14 +47,20 @@ def get_snippets(
 ) -> List[str]:
     """Return up to ``k`` snippets mentioning ``drug_name`` from ``doi``.
 
-    ``embed_model`` is reserved for future use when snippet retrieval leverages
-    OpenAI embeddings.
+    ``embed_model`` selects the OpenAI model used when querying the embedding
+    index.
     """
     results: List[str] = []
 
     if INDEX_PATH.exists():
         try:
-            emb = query_index(doi, drug_name, k=k, index_path=INDEX_PATH)
+            emb = query_index(
+                doi,
+                drug_name,
+                k=k,
+                index_path=INDEX_PATH,
+                model=embed_model or "text-embedding-3-small",
+            )
             results.extend(r.get("text", "").strip() for r in emb if r.get("text"))
         except Exception:
             results = []
