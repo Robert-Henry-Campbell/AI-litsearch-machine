@@ -66,7 +66,9 @@ def test_run_pipeline(monkeypatch, tmp_path):
     fake = FakeNarrative()
     monkeypatch.setattr("pipeline.OpenAINarrative", lambda *a, **k: fake)
 
-    pipeline.run_pipeline(str(pdf_dir), "test", retrieval_method="text")
+    pipeline.run_pipeline(
+        str(pdf_dir), "test", base_dir=tmp_path, retrieval_method="text"
+    )
 
     assert (tmp_path / "master.json").exists()
     out_file = tmp_path / "out" / "review_test.md"

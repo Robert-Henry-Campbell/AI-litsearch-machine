@@ -40,8 +40,8 @@ Below is a brief description of the main scripts and where their outputs are wri
 - `agent2/retrieval.py` returns relevant snippets from page text or the FAISS embedding index.
 - `agent2/embeddings.py` provides helpers for chunking text and generating
   embedding vectors via OpenAI.
-- `create_embeddings.py` builds a FAISS index of OpenAI embeddings from the
-  extracted text files. Use `--model` to choose the embedding model.
+- `build_embeddings.py` builds a FAISS index of OpenAI embeddings from the
+  extracted text files under a chosen base directory. Use `--model` to choose the embedding model.
 - `agent2/openai_index.py` builds and queries the FAISS index used for semantic
   snippet retrieval.
 - `agent2/openai_narrative.py` uses the OpenAI API to turn metadata and
@@ -131,8 +131,7 @@ Both commands expect a single PDF file path and should be run for every paper.
 3. Build the embedding index from the extracted text using OpenAI embeddings:
 
 ```bash
-python create_embeddings.py --text-dir data/text --index data/index.faiss \
-    --model text-embedding-3-small
+python build_embeddings.py --base_dir data --model text-embedding-3-small
 ```
 
 This step calls the OpenAI API to generate embeddings. The resulting
@@ -192,6 +191,7 @@ python agent2/synthesiser.py --drug <drug-name>
 python run_pipeline.py \
     --pdf_dir data/pdfs \
     --drug <drug-name> \
+    --base_dir data \
     --agent1-model <agent1> \
     --agent2-model <agent2> \
     --embed-model <embed> \

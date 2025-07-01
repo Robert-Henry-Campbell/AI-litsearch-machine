@@ -13,11 +13,21 @@ from pydantic import ValidationError
 from schemas.metadata import PaperMetadata
 
 
-DATA_DIR = Path(__file__).resolve().parent / "data"
-META_DIR = DATA_DIR / "meta"
-MASTER_PATH = DATA_DIR / "master.json"
-HISTORY_DIR = DATA_DIR / "master_history"
-ERROR_LOG = DATA_DIR / "aggregation_errors.log"
+BASE_DIR = Path("data")
+META_DIR = BASE_DIR / "meta"
+MASTER_PATH = BASE_DIR / "master.json"
+HISTORY_DIR = BASE_DIR / "master_history"
+ERROR_LOG = BASE_DIR / "aggregation_errors.log"
+
+
+def set_base_dir(base_dir: Path) -> None:
+    """Update all path constants to live under ``base_dir``."""
+    global BASE_DIR, META_DIR, MASTER_PATH, HISTORY_DIR, ERROR_LOG
+    BASE_DIR = Path(base_dir)
+    META_DIR = BASE_DIR / "meta"
+    MASTER_PATH = BASE_DIR / "master.json"
+    HISTORY_DIR = BASE_DIR / "master_history"
+    ERROR_LOG = BASE_DIR / "aggregation_errors.log"
 
 
 def _log_error(path: Path, exc: Exception) -> None:
@@ -72,7 +82,7 @@ def main() -> None:
     else:
         print("Skipped 0 invalid metadata files.")
     if backup is not None:
-        rel_backup = backup.relative_to(DATA_DIR)
+        rel_backup = backup.relative_to(BASE_DIR)
         print(f"Backup created: {rel_backup}")
 
 

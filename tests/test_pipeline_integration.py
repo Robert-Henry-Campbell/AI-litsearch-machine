@@ -55,6 +55,8 @@ def test_full_pipeline_cli(monkeypatch, tmp_path: Path) -> None:
             str(pdf_dir),
             "--drug",
             "TestDrug",
+            "--base_dir",
+            str(tmp_path),
             "--agent1-model",
             "a1",
             "--agent2-model",

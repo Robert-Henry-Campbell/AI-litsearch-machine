@@ -9,9 +9,16 @@ import orjson
 from agent2 import retrieval
 from agent2.openai_narrative import OpenAINarrative
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-MASTER_PATH = DATA_DIR / "master.json"
-OUTPUT_DIR = Path(__file__).resolve().parents[1] / "outputs"
+BASE_DIR = Path("data")
+MASTER_PATH = BASE_DIR / "master.json"
+OUTPUT_DIR = BASE_DIR / "outputs"
+
+
+def set_base_dir(base_dir: Path) -> None:
+    global BASE_DIR, MASTER_PATH, OUTPUT_DIR
+    BASE_DIR = Path(base_dir)
+    MASTER_PATH = BASE_DIR / "master.json"
+    OUTPUT_DIR = BASE_DIR / "outputs"
 
 
 def load_master() -> List[Dict]:
