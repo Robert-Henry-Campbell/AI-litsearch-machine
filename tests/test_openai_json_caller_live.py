@@ -36,6 +36,8 @@ def test_openai_json_caller_live():
         "targets",
         "p_threshold",
         "ld_r2",
+        "outcome",
+        "additional_QC",
     }
 
 

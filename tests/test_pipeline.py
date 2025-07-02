@@ -32,6 +32,8 @@ def valid_metadata() -> dict:
         "targets": None,
         "p_threshold": None,
         "ld_r2": None,
+        "outcome": None,
+        "additional_QC": None,
     }
 
 

@@ -58,6 +58,8 @@ def test_paper_metadata_validation():
         "targets": ["t"],
         "p_threshold": "1e-5",
         "ld_r2": "0.1",
+        "outcome": None,
+        "additional_QC": None,
     }
     meta = PaperMetadata(**data)
     assert meta.title == "T"

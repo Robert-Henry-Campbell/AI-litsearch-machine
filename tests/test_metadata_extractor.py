@@ -42,6 +42,8 @@ def valid_data() -> dict:
         "targets": None,
         "p_threshold": None,
         "ld_r2": None,
+        "outcome": None,
+        "additional_QC": None,
     }
 
 
