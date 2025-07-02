@@ -22,3 +22,5 @@ class PaperMetadata(BaseModel):
     targets: Optional[List[str]] = None
     p_threshold: Optional[str] = None
     ld_r2: Optional[str] = None
+    outcome: Optional[str] = None
+    additional_QC: Optional[str] = None

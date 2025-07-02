@@ -19,6 +19,8 @@ EXPECTED_KEYS = {
     "targets",
     "p_threshold",
     "ld_r2",
+    "outcome",
+    "additional_QC",
 }
 
 
