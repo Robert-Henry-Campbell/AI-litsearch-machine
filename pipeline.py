@@ -100,6 +100,42 @@ def extract_metadata_from_text(
     return results
 
 
+def write_agent1_batch(
+    drug_name: str,
+    batch_path: Path,
+    *,
+    agent1_model: str | None = None,
+) -> Path:
+    """Write a batch file for all Agent 1 requests and return the path."""
+    extractor = (
+        MetadataExtractor(model=agent1_model) if agent1_model else MetadataExtractor()
+    )
+    prompt = extractor.client.prompt
+    model = extractor.client.model
+    batch_path.parent.mkdir(parents=True, exist_ok=True)
+    with batch_path.open("w", encoding="utf-8") as f:
+        for text_path in sorted(TEXT_DIR.glob("*.json")):
+            data = orjson.loads(text_path.read_bytes())
+            text = extractor._join_pages(data.get("pages", []))
+            messages = [
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": text},
+            ]
+            entry = {
+                "custom_id": text_path.stem,
+                "method": "POST",
+                "url": "/v1/chat/completions",
+                "body": {
+                    "model": model,
+                    "messages": messages,
+                    "response_format": {"type": "json_object"},
+                },
+            }
+            f.write(orjson.dumps(entry).decode("utf-8"))
+            f.write("\n")
+    return batch_path
+
+
 def generate_narrative(
     drug_name: str,
     *,
@@ -155,6 +191,7 @@ def run_pipeline(
     agent2_model: str | None = None,
     embed_model: str | None = None,
     retrieval_method: Literal["faiss", "text"] = "faiss",
+    batch: bool = False,
 ) -> None:
     """Execute the full data processing pipeline."""
     dirs = make_dirs(base_dir)
@@ -173,6 +210,18 @@ def run_pipeline(
     retrieval.set_base_dir(dirs.base)
     metrics: Dict[str, StepMetrics] = {}
     timed_step(lambda: ingest_pdfs(pdf_dir, dirs), "Ingestion", metrics)
+    if batch:
+        batch_file = dirs.base / "agent1_batch.jsonl"
+        timed_step(
+            lambda: write_agent1_batch(
+                drug_name, batch_file, agent1_model=agent1_model
+            ),
+            "Prepare Batch",
+            metrics,
+        )
+        logger.info("Batch requests written to %s", batch_file)
+        logger.info("Batch mode enabled - skipping API calls and downstream steps")
+        return
     timed_step(
         lambda: extract_metadata_from_text(drug_name, agent1_model=agent1_model),
         "Metadata Extraction",
@@ -216,6 +265,11 @@ if __name__ == "__main__":
         default="faiss",
         help="Snippet retrieval backend (default: faiss)",
     )
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help="Write an OpenAI batch file of Agent 1 requests and exit",
+    )
     args = parser.parse_args()
 
     run_pipeline(
@@ -226,4 +280,5 @@ if __name__ == "__main__":
         agent2_model=args.agent2_model,
         embed_model=args.embed_model,
         retrieval_method=args.retrieval,
+        batch=args.batch,
     )

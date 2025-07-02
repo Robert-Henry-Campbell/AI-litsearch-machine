@@ -148,3 +148,38 @@ def test_no_blank_snippets(monkeypatch, tmp_path):
     monkeypatch.setattr("pipeline.OpenAINarrative", lambda *a, **k: CheckingNarrative())
 
     pipeline.generate_narrative("drug", embed_model="m", retrieval_method="faiss")
+
+
+def test_run_pipeline_batch(monkeypatch, tmp_path):
+    pdf_dir = tmp_path / "pdfs"
+    pdf_dir.mkdir()
+    pdf = pdf_dir / "p.pdf"
+    create_pdf(pdf)
+
+    monkeypatch.setattr("ingest.collector.LOG_PATH", tmp_path / "log.jsonl")
+    monkeypatch.setattr("extract.pdf_to_text.DATA_DIR", tmp_path / "text")
+    monkeypatch.setattr("agent1.metadata_extractor.META_DIR", tmp_path / "meta")
+    monkeypatch.setattr("aggregate.META_DIR", tmp_path / "meta")
+    monkeypatch.setattr("aggregate.MASTER_PATH", tmp_path / "master.json")
+    monkeypatch.setattr("aggregate.HISTORY_DIR", tmp_path / "history")
+    monkeypatch.setattr("agent2.retrieval.TEXT_DIR", tmp_path / "text")
+    monkeypatch.setattr("pipeline.OUTPUT_DIR", tmp_path / "out")
+
+    monkeypatch.setattr(
+        "agent1.metadata_extractor.MetadataExtractor.extract",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("extract called")),
+    )
+    monkeypatch.setattr(
+        "aggregate.aggregate_metadata",
+        lambda: (_ for _ in ()).throw(AssertionError("aggregate called")),
+    )
+    monkeypatch.setattr(
+        "pipeline.generate_narrative",
+        lambda *a, **k: (_ for _ in ()).throw(AssertionError("narrative called")),
+    )
+
+    pipeline.run_pipeline(str(pdf_dir), "drug", base_dir=tmp_path, batch=True)
+
+    batch_file = tmp_path / "agent1_batch.jsonl"
+    assert batch_file.exists()
+    assert batch_file.read_text().strip()

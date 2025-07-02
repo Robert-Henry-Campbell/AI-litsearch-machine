@@ -26,6 +26,11 @@ def main(argv: list[str] | None = None) -> int:
         default="faiss",
         help="Snippet retrieval backend (default: faiss)",
     )
+    parser.add_argument(
+        "--batch",
+        action="store_true",
+        help="Write an OpenAI batch file of Agent 1 requests and exit",
+    )
     args = parser.parse_args(argv)
     pipeline.run_pipeline(
         args.pdf_dir,
@@ -35,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
         agent2_model=args.agent2_model,
         embed_model=args.embed_model,
         retrieval_method=args.retrieval,
+        batch=args.batch,
     )
     return 0
 

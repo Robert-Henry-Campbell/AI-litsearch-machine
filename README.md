@@ -199,9 +199,12 @@ python run_pipeline.py \
     --agent2-model <agent2> \
     --embed-model <embed> \
     --retrieval faiss
+    [--batch]
 ```
 If not specified, Agent 1 and Agent 2 default to `gpt-4o-2024-05-13`
-and embeddings default to `text-embedding-3-small`.
+and embeddings default to `text-embedding-3-small`. Passing `--batch`
+writes `agent1_batch.jsonl` to the chosen base directory and exits
+without contacting the API.
 
 ## Output
 - Individual metadata JSONs in `data/meta/`.
