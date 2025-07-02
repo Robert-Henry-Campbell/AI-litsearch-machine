@@ -11,12 +11,12 @@ Run the end-to-end pipeline from the repository root:
 
 ```bash
 python run_pipeline.py --pdf_dir data/new_pdfs --drug <your_drug_name> \
-    --base_dir data/<your_drug_name>
+    --base_dir data/<your_drug_name> [--batch]
 ```
 
 Ensure the OpenAI API key is available via ``OPENAI_API_KEY`` or the secret file ``/run/secrets/openai_api_key`` and that you've installed the dependencies from ``requirements.txt``.
 
-This command ingests the PDFs, extracts text, gathers metadata, and generates a narrative review.
+This command ingests the PDFs, extracts text, gathers metadata, and generates a narrative review. With `--batch`, the pipeline writes `agent1_batch.jsonl` and exits before contacting the API.
 
 ## Step 3: Check Outputs
 - The review will be written to `outputs/review_<your_drug_name>.md`.
