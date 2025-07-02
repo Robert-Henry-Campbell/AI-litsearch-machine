@@ -16,7 +16,7 @@ You are a scientific information extractor.
    - `authors`: Format as "Surname of first author et al. (Year)", e.g., "Smith et al. (2022)".
    - `doi`: Exact DOI in standard form (e.g., "10.1000/j.journal.2022.01.001").
    - `pub_date`: Date published (not received or accepted) as `YYYY-MM-DD`.
-   - `data_sources`: List of dataset names exactly as mentioned, preserving case and spelling (e.g., ["INTERVAL","eQTLGen"]).
+   - `data_sources`: List of data source names used for mendelian randomization exactly as mentioned, preserving case and spelling (e.g., ["INTERVAL","eQTLGen"]). Ignore data sources not used for mendelian randomization. 
    - `omics_modalities`: Exact abbreviations used for omics modalities (e.g., ["pQTL","eQTL"]).
    - `targets`: List of target names exactly as reported in the article (gene names, proteins, etc.).
    - `p_threshold`: The p-value threshold explicitly used for selecting instruments (e.g., "5e-08").
