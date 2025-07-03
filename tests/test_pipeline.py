@@ -180,6 +180,23 @@ def test_run_pipeline_batch(monkeypatch, tmp_path):
 
     pipeline.run_pipeline(str(pdf_dir), "drug", base_dir=tmp_path, batch=True)
 
-    batch_file = tmp_path / "agent1_batch.jsonl"
+    batch_file = tmp_path / "drug_batch_1.jsonl"
     assert batch_file.exists()
     assert batch_file.read_text().strip()
+
+
+def test_batch_token_split(monkeypatch, tmp_path):
+    text_dir = tmp_path / "text"
+    text_dir.mkdir()
+    long_text = "word " * 60
+    for i in range(2):
+        path = text_dir / f"{i}.json"
+        path.write_text(
+            orjson.dumps({"pages": [{"page": 1, "text": long_text}]}).decode()
+        )
+
+    monkeypatch.setattr("pipeline.TEXT_DIR", text_dir)
+
+    batches = pipeline.write_agent1_batch("drug", tmp_path, token_limit=100)
+    assert len(batches) == 2
+    assert all(p.exists() for p in batches)

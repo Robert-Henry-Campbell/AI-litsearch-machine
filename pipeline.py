@@ -41,6 +41,9 @@ SNIPPETS_PATH = DEFAULT_SNIPPETS_PATH
 
 logger = get_logger("pipeline")
 
+# Maximum tokens allowed per OpenAI batch file
+BATCH_TOKEN_LIMIT = 40_000
+
 
 def make_dirs(base_dir: Path) -> SimpleNamespace:
     """Return a namespace of all pipeline paths derived from ``base_dir``."""
@@ -102,38 +105,67 @@ def extract_metadata_from_text(
 
 def write_agent1_batch(
     drug_name: str,
-    batch_path: Path,
+    base_dir: Path,
     *,
     agent1_model: str | None = None,
-) -> Path:
-    """Write a batch file for all Agent 1 requests and return the path."""
+    token_limit: int = BATCH_TOKEN_LIMIT,
+) -> List[Path]:
+    """Write OpenAI batch files for all Agent 1 requests.
+
+    Files are named ``<drug>_batch_<n>.jsonl`` and each file is kept below
+    ``token_limit`` tokens. The function returns the list of written files.
+    """
+
     extractor = (
         MetadataExtractor(model=agent1_model) if agent1_model else MetadataExtractor()
     )
     prompt = extractor.client.prompt
     model = extractor.client.model
-    batch_path.parent.mkdir(parents=True, exist_ok=True)
-    with batch_path.open("w", encoding="utf-8") as f:
-        for text_path in sorted(TEXT_DIR.glob("*.json")):
-            data = orjson.loads(text_path.read_bytes())
-            text = extractor._join_pages(data.get("pages", []))
-            messages = [
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": text},
-            ]
-            entry = {
-                "custom_id": text_path.stem,
-                "method": "POST",
-                "url": "/v1/chat/completions",
-                "body": {
-                    "model": model,
-                    "messages": messages,
-                    "response_format": {"type": "json_object"},
-                },
-            }
-            f.write(orjson.dumps(entry).decode("utf-8"))
-            f.write("\n")
-    return batch_path
+
+    base_dir = Path(base_dir)
+    base_dir.mkdir(parents=True, exist_ok=True)
+
+    batch_idx = 1
+    batch_path = base_dir / f"{drug_name}_batch_{batch_idx}.jsonl"
+    f = batch_path.open("w", encoding="utf-8")
+    batch_files = [batch_path]
+    token_count = 0
+
+    def entry_tokens(text: str) -> int:
+        return len(prompt.split()) + len(text.split()) + 10
+
+    for text_path in sorted(TEXT_DIR.glob("*.json")):
+        data = orjson.loads(text_path.read_bytes())
+        text = extractor._join_pages(data.get("pages", []))
+        tokens = entry_tokens(text)
+        if token_count and token_count + tokens > token_limit:
+            f.close()
+            batch_idx += 1
+            batch_path = base_dir / f"{drug_name}_batch_{batch_idx}.jsonl"
+            f = batch_path.open("w", encoding="utf-8")
+            batch_files.append(batch_path)
+            token_count = 0
+
+        messages = [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": text},
+        ]
+        entry = {
+            "custom_id": text_path.stem,
+            "method": "POST",
+            "url": "/v1/chat/completions",
+            "body": {
+                "model": model,
+                "messages": messages,
+                "response_format": {"type": "json_object"},
+            },
+        }
+        f.write(orjson.dumps(entry).decode("utf-8"))
+        f.write("\n")
+        token_count += tokens
+
+    f.close()
+    return batch_files
 
 
 def generate_narrative(
@@ -211,15 +243,21 @@ def run_pipeline(
     metrics: Dict[str, StepMetrics] = {}
     timed_step(lambda: ingest_pdfs(pdf_dir, dirs), "Ingestion", metrics)
     if batch:
-        batch_file = dirs.base / "agent1_batch.jsonl"
+        batch_files: List[Path] = []
         timed_step(
-            lambda: write_agent1_batch(
-                drug_name, batch_file, agent1_model=agent1_model
+            lambda: batch_files.extend(
+                write_agent1_batch(
+                    drug_name,
+                    dirs.base,
+                    agent1_model=agent1_model,
+                )
             ),
             "Prepare Batch",
             metrics,
         )
-        logger.info("Batch requests written to %s", batch_file)
+        logger.info(
+            "Batch requests written to %s", ", ".join(str(p) for p in batch_files)
+        )
         logger.info("Batch mode enabled - skipping API calls and downstream steps")
         return
     timed_step(
