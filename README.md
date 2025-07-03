@@ -203,8 +203,9 @@ python run_pipeline.py \
 ```
 If not specified, Agent 1 and Agent 2 default to `gpt-4o-2024-05-13`
 and embeddings default to `text-embedding-3-small`. Passing `--batch`
-writes `agent1_batch.jsonl` to the chosen base directory and exits
-without contacting the API.
+writes one or more files named `<drug>_batch_<n>.jsonl` (each capped at
+40,000 tokens) to the chosen base directory and exits without
+contacting the API.
 
 ## Output
 - Individual metadata JSONs in `data/meta/`.
