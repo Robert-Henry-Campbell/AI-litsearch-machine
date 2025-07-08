@@ -60,6 +60,8 @@ Below is a brief description of the main scripts and where their outputs are wri
   remove files in `data/pdfs/` as well.
 - `utils/master_loader.py` loads `master.json` files and verifies that two
   versions contain the same set of record keys.
+- `utils/master_diff.py` compares two masters and reports field-level
+  differences for each record.
 
 ## Features Under Development
 None at this time.
