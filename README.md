@@ -22,7 +22,7 @@ The end-to-end processing steps are:
 - **Embedding Indexing**: Builds a FAISS vector store from extracted text for semantic snippet retrieval.
 - **Embedding-based Retrieval**: Searches the FAISS index for semantically similar text chunks.
 - **Narrative Review Generation (Agent 2)**: Generates peer-review style summaries using `agent2/openai_narrative.py`.
-- **Validator Framework (Agent 3)**: Placeholder module for future pipeline checks.
+- **Validator Framework (Agent 3)**: Checks for logical conflicts between metadata fields using the OpenAI Assistants API.
 
 ## Script Overview
 Below is a brief description of the main scripts and where their outputs are written.
