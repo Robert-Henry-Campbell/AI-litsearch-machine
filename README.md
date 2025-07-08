@@ -62,6 +62,7 @@ Below is a brief description of the main scripts and where their outputs are wri
   versions contain the same set of record keys.
 - `utils/master_diff.py` compares two masters and reports field-level
   differences for each record.
+- `agent3/compare_masters.py` detects conflicts between two master JSON files using Agent 3.
 
 ## Features Under Development
 None at this time.
