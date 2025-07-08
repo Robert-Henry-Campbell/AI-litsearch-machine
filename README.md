@@ -293,8 +293,8 @@ extraction scripts simply produce output files and do not currently log.
 Contributions are welcome! Fork the repository and submit a pull request with improvements or new features.
 
 ## Continuous Integration
-A GitHub Actions workflow automatically lints Markdown files in the `outputs/` directory on pull requests to the `main` branch.
-Another workflow runs a schema drift unit test to ensure that `PaperMetadata` does not change unexpectedly.
+A GitHub Actions workflow lints Markdown files (including `README.md`) and runs the full test suite on every pull request.
+Tests must maintain at least **85%** coverage or the build fails.
 
 ## API Cost Estimation
 
