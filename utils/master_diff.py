@@ -31,7 +31,7 @@ def generate_diffs(
     for rec_key in recs1:
         r1 = recs1[rec_key]
         r2 = recs2[rec_key]
-        fields = set(r1) | set(r2)
+        fields = sorted(set(r1) | set(r2))
         for field in fields:
             v1 = r1.get(field)
             v2 = r2.get(field)
