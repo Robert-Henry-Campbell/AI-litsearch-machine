@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-litsearch-machine"
+version = "0.1.0"
+description = "Tools for extracting and synthesising MR literature."
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "docs*"]
