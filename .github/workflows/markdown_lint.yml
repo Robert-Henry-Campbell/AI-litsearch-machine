@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'outputs/*.md'
+      - 'README.md'
+      - 'docs/**/*.md'
 
 jobs:
   markdown-lint:
@@ -15,4 +17,4 @@ jobs:
         with:
           node-version: '18'
       - run: npm install -g markdownlint-cli
-      - run: markdownlint outputs/*.md
+      - run: markdownlint outputs/*.md README.md docs/**/*.md
