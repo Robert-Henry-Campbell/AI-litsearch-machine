@@ -40,7 +40,7 @@ def _prompt(entry: dict, index: int, total: int) -> tuple[str, str]:
     return value, "manual"
 
 
-def resolve(comparison_path: Path) -> Path:
+def resolve(comparison_path: Path, *, auto: str | None = None) -> Path:
     data = orjson.loads(comparison_path.read_bytes())
     conflicts = [d for d in data if d.get("conflict")]
 
@@ -52,7 +52,11 @@ def resolve(comparison_path: Path) -> Path:
     try:
         for i in range(index, len(conflicts)):
             entry = conflicts[i]
-            value, rtype = _prompt(entry, i + 1, len(conflicts))
+            if auto in {"1", "2"}:
+                value = entry[f"v{auto}"]
+                rtype = f"v{auto}"
+            else:
+                value, rtype = _prompt(entry, i + 1, len(conflicts))
             progress.append(
                 {
                     "key": entry["key"],
@@ -77,8 +81,13 @@ def resolve(comparison_path: Path) -> Path:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Resolve conflicts interactively")
     parser.add_argument("comparison", help="Path to comparison JSON")
+    parser.add_argument(
+        "--auto",
+        choices=["1", "2"],
+        help="Automatically choose version 1 or 2 for all conflicts",
+    )
     args = parser.parse_args(argv)
-    resolve(Path(args.comparison))
+    resolve(Path(args.comparison), auto=args.auto)
     return 0
 
 

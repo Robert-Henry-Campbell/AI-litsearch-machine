@@ -63,8 +63,8 @@ Below is a brief description of the main scripts and where their outputs are wri
 - `utils/master_diff.py` compares two masters and reports field-level
   differences for each record.
 - `agent3/compare_masters.py` detects conflicts between two master JSON files using Agent 3.
-- `cli/resolve_conflicts.py` interactively resolves conflicting fields recorded
-  in a comparison JSON.
+- `cli/resolve_conflicts.py` resolves conflicting fields recorded in a comparison JSON.
+  Use `--auto` to choose version 1 or 2 automatically.
 - `agent3/write_validated_master.py` merges two master files using a resolution
   JSON and writes a validated master plus a metadata summary.
 
