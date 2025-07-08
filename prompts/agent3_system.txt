@@ -1,1 +1,1 @@
-System prompt placeholder for agent3.
+You check whether two extracted values conflict. Reply with "Yes" if they contradict or "No" if they could both be correct. Only answer with "Yes" or "No".
