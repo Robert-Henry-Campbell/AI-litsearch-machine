@@ -68,6 +68,43 @@ Below is a brief description of the main scripts and where their outputs are wri
 - `agent3/write_validated_master.py` merges two master files using a resolution
   JSON and writes a validated master plus a metadata summary.
 
+## Master-to-Master Validation (Agent 3)
+
+Use this workflow to consolidate two versions of `master.json`.
+
+1. **Detect conflicts**
+
+   ```bash
+   python agent3/compare_masters.py path/to/master_v1.json \
+       path/to/master_v2.json
+   ```
+
+   The command writes `data/validation/comparison_<timestamp>.json` listing all
+   field differences.
+
+2. **Resolve conflicts**
+
+   ```bash
+   python -m cli.resolve_conflicts \
+       data/validation/comparison_<timestamp>.json
+   ```
+
+   Follow the prompts or pass `--auto 1` or `--auto 2` to accept one version
+   automatically. Resolutions are saved to
+   `data/validation/resolution_<timestamp>.json`.
+
+3. **Write validated master**
+
+   ```bash
+   python agent3/write_validated_master.py \
+       path/to/master_v1.json \
+       path/to/master_v2.json \
+       data/validation/resolution_<timestamp>.json
+   ```
+
+   The script outputs `master_validated_<timestamp>.json` and
+   `master_validated_meta_<timestamp>.json` in `data/validation/`.
+
 ## Features Under Development
 None at this time.
 
@@ -218,10 +255,12 @@ writes one or more files named `<drug>_batch_<n>.jsonl` (each capped at
 contacting the API.
 
 ## Output
+
 - Individual metadata JSONs in `data/meta/`.
 - Aggregated metadata in `data/master.json`.
 - Generated narrative reviews in `outputs/`.
 - Retrieved snippets saved to `snippets.json` before the narrative step.
+- Validation comparisons, resolutions and validated masters in `data/validation/`.
 - For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
 ## Cleaning Up Generated Data
@@ -231,6 +270,9 @@ Use `utils/data_wipe.py` to delete intermediate outputs and logs:
 ```bash
 python utils/data_wipe.py
 ```
+
+Files in `data/validation/` are not removed automatically. Delete that
+directory manually if you want to discard validation results.
 
 Raw PDFs in `data/pdfs/` remain untouched. To remove them as well, pass `--with-pdfs`:
 
