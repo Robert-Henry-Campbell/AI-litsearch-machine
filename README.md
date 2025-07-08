@@ -58,6 +58,8 @@ Below is a brief description of the main scripts and where their outputs are wri
   characters from each page as a quick sanity check.
 - `utils/data_wipe.py` deletes generated data and logs. Pass `--with-pdfs` to
   remove files in `data/pdfs/` as well.
+- `utils/master_loader.py` loads `master.json` files and verifies that two
+  versions contain the same set of record keys.
 
 ## Features Under Development
 None at this time.
