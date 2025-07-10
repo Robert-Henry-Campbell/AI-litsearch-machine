@@ -150,3 +150,24 @@ def test_merge_manual_resolution(tmp_path: Path, monkeypatch) -> None:
         "v2_chosen": 1,
         "manual_edits": 1,
     }
+
+
+def test_merge_handles_none_doi(tmp_path: Path, monkeypatch) -> None:
+    m1 = [{"doi": None, "title": "A", "year": 2020}]
+    m2 = [{"doi": None, "title": "B", "year": 2021}]
+    m1_path = tmp_path / "m1.json"
+    m2_path = tmp_path / "m2.json"
+    create_master(m1_path, m1)
+    create_master(m2_path, m2)
+
+    res_path = tmp_path / "res.json"
+    res_path.write_bytes(b"[]")
+
+    out_dir = tmp_path / "out"
+    monkeypatch.setattr(write_validated_master, "datetime", DummyDT)
+    master_path, _meta_path = write_validated_master.merge_masters(
+        m1_path, m2_path, res_path, out_dir
+    )
+
+    data = orjson.loads(master_path.read_bytes())
+    assert data == [{"title": "A", "year": 2020}]

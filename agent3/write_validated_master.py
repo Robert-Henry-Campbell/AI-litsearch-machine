@@ -25,7 +25,7 @@ def merge_masters(
     records = []
     recs1 = {rec.get("doi"): rec for rec in m1}
     recs2 = {rec.get("doi"): rec for rec in m2}
-    for key in sorted(recs1):
+    for key in sorted(recs1, key=lambda k: str(k).lower() if k is not None else ""):
         r1 = recs1[key]
         r2 = recs2[key]
         fields = sorted(set(r1) | set(r2))
