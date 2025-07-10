@@ -4,7 +4,6 @@ import sys
 import types
 from pathlib import Path
 import orjson
-import pytest
 
 # Stub out openai_validator before importing module
 fake_validator = types.ModuleType("agent3.openai_validator")
@@ -57,12 +56,48 @@ def test_compare_skips_matching_fields(tmp_path: Path, monkeypatch) -> None:
     assert called is False
 
 
-def test_compare_incompatible_masters(tmp_path: Path) -> None:
+def test_fuzzy_title_match(tmp_path: Path) -> None:
     m1_path = tmp_path / "m1.json"
     m2_path = tmp_path / "m2.json"
-    create_master(m1_path, [{"doi": "1", "title": "A"}])
-    create_master(m2_path, [{"doi": "2", "title": "B"}])
+    create_master(m1_path, [{"doi": "1", "title": "An Example Title"}])
+    create_master(m2_path, [{"doi": "x", "title": "An example title"}])
 
     out_path = tmp_path / "out.json"
-    with pytest.raises(ValueError):
-        compare_masters.compare(m1_path, m2_path, out_path)
+    results = compare_masters.compare(m1_path, m2_path, out_path)
+    assert {
+        "key": "1",
+        "field": "doi",
+        "v1": "1",
+        "v2": "x",
+        "conflict": True,
+    } in results
+    assert {
+        "key": "1",
+        "field": "title",
+        "v1": "An Example Title",
+        "v2": "An example title",
+        "conflict": True,
+    } in results
+
+
+def test_doi_tie_breaker(tmp_path: Path) -> None:
+    m1_path = tmp_path / "m1.json"
+    m2_path = tmp_path / "m2.json"
+    create_master(m1_path, [{"doi": "1", "title": "Alpha Beta"}])
+    create_master(
+        m2_path,
+        [
+            {"doi": "2", "title": "Alpha Beta"},
+            {"doi": "1", "title": "Alpha Beta Updated"},
+        ],
+    )
+
+    out_path = tmp_path / "out.json"
+    results = compare_masters.compare(m1_path, m2_path, out_path)
+    assert {
+        "key": "1",
+        "field": "title",
+        "v1": "Alpha Beta",
+        "v2": "Alpha Beta Updated",
+        "conflict": True,
+    } in results
