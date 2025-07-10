@@ -7,7 +7,7 @@ reportlab
 fastapi
 
 openai==1.93.0
-faiss-cpu=
+faiss-cpu
 scikit-learn
 numpy
 psutil
