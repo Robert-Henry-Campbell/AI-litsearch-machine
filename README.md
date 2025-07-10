@@ -73,6 +73,8 @@ Below is a brief description of the main scripts and where their outputs are wri
 
 Use this workflow to consolidate two versions of `master.json`.
 
+Records are now paired on title similarity (`token_set_ratio` ≥ 90 %). DOI is used only as an exact match or as a tie-breaker when multiple titles score ≥ 90 %.
+
 1. **Detect conflicts**
 
    ```bash
