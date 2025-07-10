@@ -112,7 +112,7 @@ None at this time.
 Clone the repository and create a virtual environment:
 
 ```bash
-git clone https://github.com/yourusername/your-repo.git
+git clone https://github.com/Robert-Henry-Campbell/AI-litsearch-machine.git
 cd your-repo
 python3 -m venv venv
 source .venv/Scripts/activate
