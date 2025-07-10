@@ -1,13 +1,13 @@
-pdfminer.six==20250506
-pytesseract==0.3.13
-Pillow==11.2.1
-pydantic==2.11.7
-orjson==3.10.18
-reportlab==4.4.2
-fastapi>=0.110.0
+pdfminer.six
+pytesseract
+Pillow
+pydantic
+orjson
+reportlab
+fastapi
 
 openai==1.93.0
-faiss-cpu==1.7.4
-scikit-learn==1.7.0
-numpy<2
-psutil==5.9.8
+faiss-cpu=
+scikit-learn
+numpy
+psutil
