@@ -123,7 +123,8 @@ Install dependencies from the provided requirements file:
 ```bash
 pip install -r requirements.txt
 ```
-This installs the pinned OpenAI client and all other packages needed for the pipeline.
+This installs the pinned OpenAI client and all other packages needed for the pipeline. 
+Note: python 3.12.x required. 3.13 will not work currently for numpy. 
 
 Provide your OpenAI API key via the ``OPENAI_API_KEY`` environment variable or
 as a Docker secret at ``/run/secrets/openai_api_key``. The key cannot be stored
