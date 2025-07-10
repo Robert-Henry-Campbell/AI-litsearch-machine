@@ -44,3 +44,23 @@ def test_is_conflict_reuses_assistant(validator):
     assert ov.is_conflict("A", "B", "title") is True
     assert ov.is_conflict("A", "A", "title") is False
     assert create_call.call_count == 1
+
+
+def test_is_conflict_retries(validator, monkeypatch):
+    ov, _create, responses = validator
+
+    client = ov._get_client()
+    call_count = {"n": 0}
+
+    def fail_then_succeed(*_a, **_k):
+        call_count["n"] += 1
+        if call_count["n"] < 3:
+            raise Exception("boom")
+        return types.SimpleNamespace(id="thread-ok")
+
+    client.beta.threads.create.side_effect = fail_then_succeed
+    responses.append("Yes")
+    monkeypatch.setattr(ov.time, "sleep", lambda _x: None)
+
+    assert ov.is_conflict("A", "B", "title") is True
+    assert call_count["n"] == 3

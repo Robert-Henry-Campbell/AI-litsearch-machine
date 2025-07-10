@@ -67,6 +67,7 @@ Below is a brief description of the main scripts and where their outputs are wri
   Use `--auto` to choose version 1 or 2 automatically.
 - `agent3/write_validated_master.py` merges two master files using a resolution
   JSON and writes a validated master plus a metadata summary.
+- `run_validation.py` runs the full master validation workflow in one step.
 
 ## Master-to-Master Validation (Agent 3)
 
@@ -104,6 +105,14 @@ Use this workflow to consolidate two versions of `master.json`.
 
    The script outputs `master_validated_<timestamp>.json` and
    `master_validated_meta_<timestamp>.json` in `data/validation/`.
+
+You can also run the entire process in one command:
+
+```bash
+python run_validation.py path/to/master_v1.json path/to/master_v2.json --auto 1
+```
+
+This writes all outputs under `data/validation/` using the same timestamp.
 
 ## Features Under Development
 None at this time.
