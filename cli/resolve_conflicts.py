@@ -23,7 +23,9 @@ def _write_temp(path: Path, data: List[dict]) -> None:
 
 
 def _prompt(entry: dict, index: int, total: int) -> tuple[str, str]:
-    print(f"[{index}/{total}] Field: {entry['field']}")
+    title = entry.get("title") or entry.get("key")
+    print(f"[{index}/{total}] Title: {title}")
+    print(f"Field: {entry['field']}")
     print(f"1) {entry['v1']}")
     print(f"2) {entry['v2']}")
     print("M) Manual entry")
