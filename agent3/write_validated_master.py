@@ -12,7 +12,12 @@ OUT_DIR = Path("data/validation")
 
 
 def merge_masters(
-    m1_path: Path, m2_path: Path, res_path: Path, out_dir: Path
+    m1_path: Path,
+    m2_path: Path,
+    res_path: Path,
+    out_dir: Path,
+    *,
+    drug: str | None = None,
 ) -> tuple[Path, Path]:
     m1 = load_master(m1_path)
     m2 = load_master(m2_path)
@@ -41,7 +46,11 @@ def merge_masters(
 
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     out_dir.mkdir(parents=True, exist_ok=True)
-    master_path = out_dir / f"master_validated_{timestamp}.json"
+    if drug:
+        master_name = f"master_{drug}_cleaned_{timestamp}.json"
+    else:
+        master_name = f"master_validated_{timestamp}.json"
+    master_path = out_dir / master_name
     meta_path = out_dir / f"master_validated_meta_{timestamp}.json"
     master_path.write_bytes(orjson.dumps(records, option=orjson.OPT_INDENT_2))
 
@@ -66,6 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("master_v2", help="Path to master_v2.json")
     parser.add_argument("resolution", help="Path to resolution JSON")
     parser.add_argument("--out_dir", default=str(OUT_DIR), help="Output directory")
+    parser.add_argument("--drug", help="Drug name used for output file naming")
     args = parser.parse_args(argv)
 
     merge_masters(
@@ -73,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.master_v2),
         Path(args.resolution),
         Path(args.out_dir),
+        drug=args.drug,
     )
     return 0
 

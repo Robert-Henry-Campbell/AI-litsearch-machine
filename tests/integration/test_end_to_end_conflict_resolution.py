@@ -50,10 +50,12 @@ def test_end_to_end(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
             str(res_path),
             "--out_dir",
             str(out_dir),
+            "--drug",
+            "DrugY",
         ]
     )
     assert write_code == 0
-    master_path = out_dir / "master_validated_20240102_030405.json"
+    master_path = out_dir / "master_DrugY_cleaned_20240102_030405.json"
     meta_path = out_dir / "master_validated_meta_20240102_030405.json"
     data = orjson.loads(master_path.read_bytes())
     assert data == [
