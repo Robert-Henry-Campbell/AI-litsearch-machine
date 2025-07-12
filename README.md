@@ -66,7 +66,7 @@ Below is a brief description of the main scripts and where their outputs are wri
 - `cli/resolve_conflicts.py` resolves conflicting fields recorded in a comparison JSON.
   Use `--auto` to choose version 1 or 2 automatically.
 - `agent3/write_validated_master.py` merges two master files using a resolution
-  JSON and writes a validated master plus a metadata summary.
+  JSON and writes a cleaned master plus a metadata summary.
 - `run_validation.py` runs the full master validation workflow in one step.
 
 ## Master-to-Master Validation (Agent 3)
@@ -103,10 +103,11 @@ Records are now paired on title similarity (`token_set_ratio` ≥ 90 %). DOI is 
    python agent3/write_validated_master.py \
        path/to/master_v1.json \
        path/to/master_v2.json \
-       data/validation/resolution_<timestamp>.json
+       data/validation/resolution_<timestamp>.json \
+       --drug <drug-name>
    ```
 
-   The script outputs `master_validated_<timestamp>.json` and
+   The script outputs `master_<drug-name>_cleaned_<timestamp>.json` and
    `master_validated_meta_<timestamp>.json` in `data/validation/`.
 
 You can also run the entire process in one command:
@@ -273,7 +274,7 @@ contacting the API.
 - Aggregated metadata in `data/master.json`.
 - Generated narrative reviews in `outputs/`.
 - Retrieved snippets saved to `snippets.json` before the narrative step.
-- Validation comparisons, resolutions and validated masters in `data/validation/`.
+- Validation comparisons, resolutions and cleaned masters in `data/validation/`.
 - For instructions on processing a new drug, see `docs/HOW_TO_ADD_NEW_DRUG.md`.
 
 ## Cleaning Up Generated Data
