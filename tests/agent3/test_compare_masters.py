@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import types
 from pathlib import Path
+import logging
 import orjson
 
 # Stub out openai_validator before importing module
@@ -101,3 +102,17 @@ def test_doi_tie_breaker(tmp_path: Path) -> None:
         "v2": "Alpha Beta Updated",
         "conflict": True,
     } in results
+
+
+def test_logs_unmatched_titles(tmp_path: Path, caplog) -> None:
+    m1 = tmp_path / "m1.json"
+    m2 = tmp_path / "m2.json"
+    create_master(m1, [{"title": "First"}])
+    create_master(m2, [{"title": "Second"}])
+
+    out = tmp_path / "out.json"
+    with caplog.at_level(logging.INFO):
+        compare_masters.compare(m1, m2, out)
+
+    assert "Matched 0 papers" in caplog.text
+    assert "No match for: First; Second" in caplog.text

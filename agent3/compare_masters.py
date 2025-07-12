@@ -15,9 +15,12 @@ OUT_DIR = Path("data/validation")
 logger = get_logger(__name__)
 
 
-def _pair_records(master1: list[dict], master2: list[dict]) -> list[tuple[dict, dict]]:
+def _pair_records(
+    master1: list[dict], master2: list[dict]
+) -> tuple[list[tuple[dict, dict]], list[str]]:
     pairs: list[tuple[dict, dict]] = []
     remaining = list(master2)
+    unmatched: list[str] = []
     for rec1 in master1:
         doi1 = rec1.get("doi")
         title1 = rec1.get("title", "")
@@ -46,15 +49,17 @@ def _pair_records(master1: list[dict], master2: list[dict]) -> list[tuple[dict, 
             rec2 = remaining.pop(match_idx)
             pairs.append((rec1, rec2))
         else:
-            logger.warning("No match found for record %s", doi1 or title1)
-    return pairs
+            unmatched.append(title1)
+
+    unmatched.extend(rec.get("title", "") for rec in remaining)
+    return pairs, unmatched
 
 
 def compare(master1_path: Path, master2_path: Path, out_path: Path) -> list[dict]:
     """Compare *master1_path* and *master2_path* and write results to *out_path*."""
     m1 = load_master(master1_path)
     m2 = load_master(master2_path)
-    pairs = _pair_records(m1, m2)
+    pairs, unmatched = _pair_records(m1, m2)
     results: list[dict] = []
     for rec1, rec2 in pairs:
         key = rec1.get("doi") or rec2.get("doi") or rec1.get("title")
@@ -76,6 +81,9 @@ def compare(master1_path: Path, master2_path: Path, out_path: Path) -> list[dict
             )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_bytes(orjson.dumps(results, option=orjson.OPT_INDENT_2))
+    logger.info("Matched %s papers", len(pairs))
+    if unmatched:
+        logger.info("No match for: %s", "; ".join(t for t in unmatched if t))
     logger.info(
         "Compared %s fields, %s conflicts found",
         len(results),

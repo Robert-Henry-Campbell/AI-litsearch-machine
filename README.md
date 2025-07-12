@@ -83,7 +83,8 @@ Records are now paired on title similarity (`token_set_ratio` ≥ 90 %). DOI is 
    ```
 
    The command writes `data/validation/comparison_<timestamp>.json` listing all
-   field differences.
+   field differences. The script also logs how many papers were paired and
+   prints any titles that could not be matched.
 
 2. **Resolve conflicts**
 
